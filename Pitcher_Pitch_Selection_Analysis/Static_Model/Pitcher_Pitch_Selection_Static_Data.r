@@ -1,15 +1,3 @@
-library(DBI)
-library(RPostgres)
-library(tidyverse)
-library(glue)
-library(httr)
-library(jsonlite)
-library(dplyr)
-library(tidyr)
-library(lubridate)
-library(stringr)
-library(ggplot2)
-library(readr)
 
 pitcher_static_model <- function(pitcher_statcast_df) {
     
