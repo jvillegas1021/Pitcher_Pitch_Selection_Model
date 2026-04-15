@@ -128,7 +128,7 @@ run_pitcher_scouting_report <- function(pitcher_id, statcast_df) {
     
     final_scouting_report <- scouting_report_cleaned %>%
     pivot_longer(
-        pitch_columns,
+        all_of(pitch_columns),
         names_to = 'pitch_type',
         values_to = 'probability'
         )
