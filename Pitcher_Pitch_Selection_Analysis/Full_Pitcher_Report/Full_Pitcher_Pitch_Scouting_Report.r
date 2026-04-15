@@ -11,11 +11,11 @@ library(stringr)
 library(ggplot2)
 library(readr)
 
-source("Static_Model/Pitcher_Pitch_Selection_Static_Data.r")
-source("Static_Model/Pitcher_First_Pitch_Prediction.r")
-source("Static_Model/Pitch_Selection_Multipliers.r")
-source("Pitch_Prediction/Pitch_Prediction.r")
-source("Scouting_Report/Scouting_Report.r")
+source("Pitcher_Pitch_Selection_Static_Data.r")
+source("Pitch_Selection_Multipliers.r")
+source("Pitcher_First_Pitch_Prediction")
+source("Pitch_Prediction.r")
+source("Scouting_Report.r")
 
 
 pitcher_data <- read_csv("C:/Users/james.villegas/OneDrive - Rotork plc/Desktop/Baseball/imanaga.csv", show_col_types = FALSE)
