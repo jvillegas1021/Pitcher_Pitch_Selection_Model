@@ -13,7 +13,7 @@ library(readr)
 
 source("Pitcher_Pitch_Selection_Static_Data.r")
 source("Pitch_Selection_Multipliers.r")
-source("Pitcher_First_Pitch_Prediction")
+source("Pitcher_First_Pitch_Prediction.r")
 source("Pitch_Prediction.r")
 source("Scouting_Report.r")
 
