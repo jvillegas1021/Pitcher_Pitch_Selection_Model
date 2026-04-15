@@ -7,7 +7,7 @@ run_pitcher_scouting_report <- function(pitcher_id, statcast_df) {
         )
 
     player_name <- pitcher_data$player_name[1]
-    
+    player_id <- pitcher_id
     # scout report
     # grab all pitch types
     
