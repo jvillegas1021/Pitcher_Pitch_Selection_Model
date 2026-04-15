@@ -20,6 +20,9 @@ source("Scouting_Report.r")
 
 pitcher_data <- read_csv("C:/Users/james.villegas/OneDrive - Rotork plc/Desktop/Baseball/imanaga.csv", show_col_types = FALSE)
 
+player_name <- pitcher_data$player_name[1]
+player_id <- pitcher_data$pitcher[1]
+
 pitcher_data <- pitcher_data %>%
 drop_na(pitch_type)
 
@@ -31,7 +34,7 @@ pitch_totals <- pitcher_data %>%
     mutate(total_usage_perc = total_pitch_count / sum(total_pitch_count))
 
 valid_pitches <- pitch_totals %>%
-    filter(total_usage_perc >= 0.15) %>%
+    filter(total_usage_perc >= 0.10) %>%
     pull(pitch_type)
 
 pitcher_data <- pitcher_data %>%
@@ -112,6 +115,7 @@ for (tto in tto_count_list) {
 }
 
 scouting_report <- bind_rows(situation_row_list)
+
 pitch_columns <- setdiff(names(scouting_report), c('balls', 'strikes', 'stance', 'runners_on', 'risp', 'tto', 'prev_pitch', 'prev_result'))
 
 scouting_report_cleaned <- scouting_report %>%
@@ -122,13 +126,29 @@ filter(
 scouting_report_cleaned <- scouting_report_cleaned %>%
     mutate(across(all_of(pitch_columns), ~replace_na(.x, 0)))
 
-scouting_report_cleaned_vs_rhb <- scouting_report_cleaned %>%
-filter(
-    stance == 'R'
+scouting_report_cleaned <- scouting_report_cleaned %>%
+mutate(
+    pitcher_id = player_id,
+    pitcher_name = player_name,
+    situation_id = row_number()
+)
+
+scouting_report_cleaned <- scouting_report_cleaned %>%
+relocate(
+    pitcher_id, .before=balls
+    ) %>%
+relocate(
+    pitcher_name, .after=pitcher_id
+    ) %>%
+relocate(
+    situation_id, .after=pitcher_name
     )
 
-scouting_report_cleaned_vs_lhb <- scouting_report_cleaned %>%
-filter(
-    stance == 'L'
+final_scouting_report <- scouting_report_cleaned %>%
+pivot_longer(
+    pitch_columns,
+    names_to = 'pitch_type',
+    values_to = 'probability'
     )
 
+final_scouting_report
