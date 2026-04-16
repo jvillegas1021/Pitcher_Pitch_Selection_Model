@@ -20,7 +20,7 @@ source("Full_Pitcher_Pitch_Scouting_Report.r")
 
 
 
-statcast_data <- read_csv("C:/Users/james.villegas/OneDrive - Rotork plc/Desktop/Baseball/statcast_25_26.csv", show_col_types = FALSE)
+statcast_data <- read_csv()
 
 # clean data
 
