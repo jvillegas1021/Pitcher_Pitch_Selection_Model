@@ -42,6 +42,12 @@ run_pitcher_scouting_report <- function(pitcher_id, statcast_df) {
         for (stance in stance_list) {
             for (runners in runners_on_list) {
                 for (risp in risp_list) {
+                    # runners in scoring position must mean runners on
+                    if (risp && !runners) {
+                        #skip
+                        next
+                    }
+                    
                     for (ball in ball_count_list) {
                         for (strike in strike_count_list) {
     
