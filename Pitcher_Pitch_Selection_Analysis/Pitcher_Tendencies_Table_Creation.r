@@ -17,6 +17,7 @@ source("Pitcher_First_Pitch_Prediction.r")
 source("Pitch_Prediction.r")
 source("Scouting_Report.r")
 source("Full_Pitcher_Pitch_Scouting_Report.r")
+source("sql_load_function.r")
 
 
 
@@ -111,3 +112,7 @@ for (batch in batch_index_list) {
         all_pitcher_report_list[[length(all_pitcher_report_list) + 1]] <- pitcher_report
     }
 }
+
+sql_table_name <- 'pitcher_scouting_reports'
+
+write_df_to_sql(sql_table_name, all_pitcher_reports_df)
