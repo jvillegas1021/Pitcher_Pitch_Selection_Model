@@ -113,6 +113,24 @@ for (batch in batch_index_list) {
     }
 }
 
+all_pitcher_reports_df <- bind_rows(all_pitcher_report_list)
+
+pitch_names <- statcast_data %>%
+    distinct(
+        pitch_type,
+        pitch_name
+        )
+new_all_pitcher_reports_df <- all_pitcher_reports_df %>%
+left_join(
+    pitch_names,
+    by='pitch_type'
+    ) %>%
+relocate(
+    pitch_name, .before= probability
+    )
+
+final_all_pitcher_reports_df
+
 sql_table_name <- 'pitcher_scouting_reports'
 
-write_df_to_sql(sql_table_name, all_pitcher_reports_df)
+write_df_to_sql(sql_table_name, final_all_pitcher_reports_df)
