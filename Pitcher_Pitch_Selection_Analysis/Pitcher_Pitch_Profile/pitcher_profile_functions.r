@@ -86,6 +86,9 @@ create_pitcher_pitch_performance_profile <- function(pitcher_df) {
         'triple',
         'home_run'
     )
+
+    total_first_pitches <- sum(pitcher_df$pitch_number ==1)
+    total_two_strike_pitches <- 
     
     pitcher_performance_df <- pitcher_df %>%
     group_by(pitch_type, pitch_name) %>%
@@ -120,16 +123,16 @@ create_pitcher_pitch_performance_profile <- function(pitcher_df) {
     mutate(in_zone_perc = round(pitches_in_zone / total_thrown * 100, 2),
            out_zone_perc = round(pitches_out_zone / total_thrown * 100, 2),
            swing_perc = round(swings / total_thrown * 100, 2),
-           swing_in_zone_perc = round(swings_in_zone / total_thrown * 100, 2),
-           swing_out_zone_perc = round(swings_out_zone / total_thrown * 100, 2),
+           swing_in_zone_perc = round(swings_in_zone / pitches_in_zone * 100, 2),
+           swing_out_zone_perc = round(swings_out_zone / pitches_out_zone * 100, 2),
            contact_perc = round(contacted_balls / total_thrown * 100, 2),
-           contact_in_zone_perc = round(contacted_balls_in_zone / total_thrown * 100, 2),
-           contact_out_zone_perc = round(contacted_balls_out_zone / total_thrown * 100, 2),
+           contact_in_zone_perc = round(contacted_balls_in_zone / pitches_in_zone * 100, 2),
+           contact_out_zone_perc = round(contacted_balls_out_zone / pitches_out_zone * 100, 2),
            whiff_perc = round(whiffs / total_thrown * 100, 2),
-           whiff_in_zone_perc = round(whiffs_in_zone / total_thrown * 100, 2),
-           whiff_out_zone_perc = round(whiffs_out_zone / total_thrown * 100, 2),
-           first_pitch_perc = round(first_pitches / total_thrown * 100, 2),
-           first_pitch_strike_perc = round(first_pitch_strikes / total_thrown * 100, 2),
+           whiff_in_zone_perc = round(whiffs_in_zone / pitches_in_zone * 100, 2),
+           whiff_out_zone_perc = round(whiffs_out_zone / pitches_out_zone * 100, 2),
+           first_pitch_perc = round(first_pitches / total_first_pitches * 100, 2),
+           first_pitch_strike_perc = round(first_pitch_strikes / first_pitches * 100, 2),
            strike_perc = round(strikes / total_thrown * 100, 2),
            ball_perc = round(balls / total_thrown * 100, 2),
            strike_out_perc = round(strike_outs / total_thrown * 100, 2),
@@ -188,7 +191,7 @@ create_pitcher_pitch_plots <- function(pitcher_df) {
     ### WHERE PITCHES THROWN
 
     ggplot(pitcher_pitch_filtered_df, aes(plate_x, plate_z)) +
-      stat_density_2d_filled(bins = 8) +
+      stat_density_2d_filled(bins = 20, show.legend = FALSE) +
       facet_grid(stand ~ pitch_name) +
       annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
                fill=NA, color="white", linewidth=1) +
@@ -200,7 +203,7 @@ create_pitcher_pitch_plots <- function(pitcher_df) {
     contact_df <- pitcher_pitch_filtered_df %>% filter(description == 'hit_into_play')
     
     ggplot(contact_df, aes(plate_x, plate_z)) +
-      stat_density_2d_filled(bins = 10) +
+      stat_density_2d_filled(bins = 20, show.legend = FALSE) +
       facet_grid(stand ~ pitch_name) +
       annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
                fill=NA, color="white", linewidth=1) +
@@ -208,19 +211,7 @@ create_pitcher_pitch_plots <- function(pitcher_df) {
       theme_minimal()
 
 
-    # WHERE THEY WHIFF
-    
-    whiff_df <- pitcher_pitch_filtered_df %>% 
-      filter(description %in% c("swinging_strike", "swinging_strike_blocked", na.rm=TRUE))
-    
-    ggplot(whiff_df, aes(plate_x, plate_z)) +
-      stat_density_2d_filled(bins = 10) +
-      facet_grid(stand ~ pitch_type) +
-      annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
-               fill=NA, color="white", linewidth=1) +
-      coord_fixed() +
-      theme_minimal()
-
+}
 
 
 
