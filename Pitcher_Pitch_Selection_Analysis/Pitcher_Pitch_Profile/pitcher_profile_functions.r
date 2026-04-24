@@ -180,10 +180,46 @@ create_pitcher_pitch_performance_profile <- function(pitcher_df) {
 
 
 
+create_pitcher_pitch_location_profile <- function(pitcher_df) {
+    return
+    }
+
+create_pitcher_pitch_plots <- function(pitcher_df) {
+    ### WHERE PITCHES THROWN
+
+    ggplot(pitcher_pitch_filtered_df, aes(plate_x, plate_z)) +
+      stat_density_2d_filled(bins = 8) +
+      facet_grid(stand ~ pitch_name) +
+      annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
+               fill=NA, color="white", linewidth=1) +
+      coord_fixed() +
+      theme_minimal()
+
+    # WHERE PITCHES ARE HIT!
+
+    contact_df <- pitcher_pitch_filtered_df %>% filter(description == 'hit_into_play')
+    
+    ggplot(contact_df, aes(plate_x, plate_z)) +
+      stat_density_2d_filled(bins = 10) +
+      facet_grid(stand ~ pitch_name) +
+      annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
+               fill=NA, color="white", linewidth=1) +
+      coord_fixed() +
+      theme_minimal()
 
 
-
-
+    # WHERE THEY WHIFF
+    
+    whiff_df <- pitcher_pitch_filtered_df %>% 
+      filter(description %in% c("swinging_strike", "swinging_strike_blocked", na.rm=TRUE))
+    
+    ggplot(whiff_df, aes(plate_x, plate_z)) +
+      stat_density_2d_filled(bins = 10) +
+      facet_grid(stand ~ pitch_type) +
+      annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
+               fill=NA, color="white", linewidth=1) +
+      coord_fixed() +
+      theme_minimal()
 
 
 
