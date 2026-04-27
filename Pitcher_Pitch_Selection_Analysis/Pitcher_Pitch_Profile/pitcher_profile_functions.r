@@ -190,7 +190,7 @@ create_pitcher_pitch_location_profile <- function(pitcher_df) {
 create_pitcher_pitch_plots <- function(pitcher_df) {
     ### WHERE PITCHES THROWN
 
-    ggplot(pitcher_pitch_filtered_df, aes(plate_x, plate_z)) +
+    pitch_general_location <- ggplot(pitcher_df, aes(plate_x, plate_z)) +
       stat_density_2d_filled(bins = 20, show.legend = FALSE) +
       facet_grid(stand ~ pitch_name) +
       annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
@@ -198,11 +198,11 @@ create_pitcher_pitch_plots <- function(pitcher_df) {
       coord_fixed() +
       theme_minimal()
 
-    # WHERE PITCHES ARE HIT!
+    # WHERE PITCHES ARE CONTACTED!
 
-    contact_df <- pitcher_pitch_filtered_df %>% filter(description == 'hit_into_play')
+    contact_df <- pitcher_df %>% filter(description == 'hit_into_play')
     
-    ggplot(contact_df, aes(plate_x, plate_z)) +
+    pitch_contact_location <- ggplot(contact_df, aes(plate_x, plate_z)) +
       stat_density_2d_filled(bins = 20, show.legend = FALSE) +
       facet_grid(stand ~ pitch_name) +
       annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
@@ -210,7 +210,55 @@ create_pitcher_pitch_plots <- function(pitcher_df) {
       coord_fixed() +
       theme_minimal()
 
+    
+    # WHERE PITCHES ARE MISSED THE MOST
 
+    whiff_df <- pitcher_df %>% filter(description %in% c('swinging_strike', 'swinging_strike_blocked'))
+
+    pitch_whiff_location <- ggplot(contact_df, aes(plate_x, plate_z)) +
+      stat_density_2d_filled(bins = 20, show.legend = FALSE) +
+      facet_grid(stand ~ pitch_name) +
+      annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
+               fill=NA, color="white", linewidth=1) +
+      coord_fixed() +
+      theme_minimal()
+
+    # WEAK CONTACT, VS HARD CONTACT
+
+    hit_hard_df <- pitcher_pitch_filtered_df %>%
+    filter(type == 'X') %>%
+    mutate(hard_hit = launch_speed >= 95)
+    
+    weak_df <- hit_hard_df %>% filter(!hard_hit)
+    hard_df <- hit_hard_df %>% filter(hard_hit)
+    
+    pitch_hard_vs_weak_location <- ggplot() +
+      stat_density_2d(
+        data = weak_df,
+        aes(plate_x, plate_z, color = "weak"),
+        bins = 10,
+        alpha = 0.8
+      ) +
+      stat_density_2d(
+        data = hard_df,
+        aes(plate_x, plate_z, color = "hard"),
+        bins = 10,
+        alpha = 0.8
+      ) +
+      scale_color_manual(values = c("weak" = "cyan", "hard" = "red")) +
+      facet_grid(stand ~ pitch_name) +
+      annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
+               fill=NA, color="black", linewidth=1, linetype = 'dashed') +
+      coord_fixed(xlim = c(-2, 2), ylim = c(0, 4)) +
+      theme_minimal()
+
+    return(
+        list(
+        pitch_location = pitch_general_location,
+        contact_location = pitch_contact_location,
+        whiff_location = pitch_whiff_location,
+        hard_vs_weak_location = pitch_hard_vs_weak_location)
+           )
 }
 
 
