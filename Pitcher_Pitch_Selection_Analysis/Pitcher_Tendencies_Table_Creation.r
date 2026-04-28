@@ -17,11 +17,11 @@ source("Pitcher_First_Pitch_Prediction.r")
 source("Pitch_Prediction.r")
 source("Scouting_Report.r")
 source("Full_Pitcher_Pitch_Scouting_Report.r")
-source("sql_load_function.r")
+source("sql_functions.r")
 
 
 
-statcast_data <- read_csv()
+statcast_data <- #READ FROM SQL LAKE
 
 # clean data
 
@@ -91,7 +91,6 @@ for (batch in batch_index_list) {
 
 all_pitcher_report_list <- list()
 
-
 for (batch in batch_index_list) {
 
     current_batch <- pitcher_batches[[batch]]
@@ -101,17 +100,24 @@ for (batch in batch_index_list) {
     for (pitcher in current_batch) {
 
         cache_file <- paste0("cache/pitcher_", pitcher, ".rds")
-        
+
         if (!file.exists(cache_file)) {
-            next
+            message("Does not exist, creating pitcher report for: ", pitcher)
+
+            pitcher_report <- run_pitcher_scouting_report(pitcher, statcast_data_ordered)
+
+            saveRDS(pitcher_report, cache_file)
+
+        } else {
+            message("Grabbing pitcher report for: ", pitcher)
+            pitcher_report <- readRDS(cache_file)
         }
-        message("Grabbing pitcher report for :", pitcher)
-        
-        pitcher_report <- readRDS(cache_file)
-        
+
+        # ALWAYS append the report
         all_pitcher_report_list[[length(all_pitcher_report_list) + 1]] <- pitcher_report
     }
 }
+
 
 all_pitcher_reports_df <- bind_rows(all_pitcher_report_list)
 
@@ -122,23 +128,23 @@ pitch_names <- statcast_data %>%
         )
 
 new_all_pitcher_reports_df <- all_pitcher_reports_df %>%
-left_join(
-    pitch_names,
-    by='pitch_type'
+    left_join(
+        pitch_names,
+        by = "pitch_type"
     ) %>%
-left_join(
-    pitch_names %>%
-    rename(
-        prev_pitch = pitch_type,
-        prev_pitch_name = pitch_name
-        ),
-    by = 'prev_pitch'
+    left_join(
+        pitch_names %>%
+            rename(
+                prev_pitch = pitch_type,
+                prev_pitch_name = pitch_name
+            ),
+        by = "prev_pitch"
     ) %>%
-relocate(
-    pitch_name, .before=probability
+    relocate(
+        pitch_name, .before = probability
     ) %>%
-relocate(
-    prev_pitch_name, .after=prev_pitch
+    relocate(
+        prev_pitch_name, .after = prev_pitch
     )
 
 final_all_pitcher_reports_df
