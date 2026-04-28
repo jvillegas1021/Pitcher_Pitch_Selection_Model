@@ -120,13 +120,25 @@ pitch_names <- statcast_data %>%
         pitch_type,
         pitch_name
         )
+
 new_all_pitcher_reports_df <- all_pitcher_reports_df %>%
 left_join(
     pitch_names,
     by='pitch_type'
     ) %>%
+left_join(
+    pitch_names %>%
+    rename(
+        prev_pitch = pitch_type,
+        prev_pitch_name = pitch_name
+        ),
+    by = 'prev_pitch'
+    ) %>%
 relocate(
-    pitch_name, .before= probability
+    pitch_name, .before=probability
+    ) %>%
+relocate(
+    prev_pitch_name, .after=prev_pitch
     )
 
 final_all_pitcher_reports_df
