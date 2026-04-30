@@ -1,4 +1,4 @@
-build_situation_row <- function(pitcher_df, pitcher_static_model, balls, strikes, stance, runners_on, risp, tto, prev_pitch, prev_result) {
+build_situation_row <- function(pitcher_df, pitcher_static_model, balls, strikes, stance, runners_on, risp, tto, leverage, prev_pitch, prev_result) {
     
     # Run prediction
     probs <- predict_pitch_probabilities(
@@ -10,6 +10,7 @@ build_situation_row <- function(pitcher_df, pitcher_static_model, balls, strikes
         runners_on,
         risp,
         tto,
+        leverage,
         prev_pitch,
         prev_result
     )
@@ -22,6 +23,7 @@ build_situation_row <- function(pitcher_df, pitcher_static_model, balls, strikes
         runners_on = runners_on,
         risp = risp,
         tto = tto,
+        count_leverage = leverage,
         prev_pitch = prev_pitch,
         prev_result = prev_result,
         stringsAsFactors = FALSE
