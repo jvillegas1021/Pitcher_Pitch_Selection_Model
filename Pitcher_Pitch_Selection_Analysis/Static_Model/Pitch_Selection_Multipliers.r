@@ -128,32 +128,6 @@ pitch_base_runners_selection_multiplier_df <- function(static_model, base_runner
     return(pitch_base_runners_selection_multiplier_df)
     }
 
-pitch_tto_selection_multiplier_df <- function(static_model, tto) {
-
-    pitch_tto_general_usage_df <- static_model$general_usage
-
-    pitch_tto_usage_df <- static_model$tto_usage
-
-    pitch_tto_usage_filtered_df <- pitch_tto_usage_df %>%
-    filter(
-        n_thruorder_pitcher == tto
-        )
-    
-    pitch_tto_selection_multiplier_df <- pitch_tto_general_usage_df %>%
-    left_join(
-        pitch_tto_usage_filtered_df,
-        by='pitch_type'
-        ) %>%
-    mutate(
-        pitch_tto_multiplier = pitch_tto_usage / pitch_general_usage
-        ) %>%
-    select(
-        pitch_type,
-        pitch_tto_multiplier
-        )
-    
-    return(pitch_tto_selection_multiplier_df)
-    }
 
 pitch_base_runners_scoring_position_selection_multiplier_df <- function(static_model, base_runners_scoring_position = FALSE) {
 
@@ -187,3 +161,59 @@ pitch_base_runners_scoring_position_selection_multiplier_df <- function(static_m
     return(pitch_base_runners_scoring_position_selection_multiplier_df)
     }
 
+pitch_tto_selection_multiplier_df <- function(static_model, tto) {
+
+    pitch_tto_general_usage_df <- static_model$general_usage
+
+    pitch_tto_usage_df <- static_model$tto_usage
+
+    pitch_tto_usage_filtered_df <- pitch_tto_usage_df %>%
+    filter(
+        n_thruorder_pitcher == tto
+        )
+    
+    pitch_tto_selection_multiplier_df <- pitch_tto_general_usage_df %>%
+    left_join(
+        pitch_tto_usage_filtered_df,
+        by='pitch_type'
+        ) %>%
+    mutate(
+        pitch_tto_multiplier = pitch_tto_usage / pitch_general_usage
+        ) %>%
+    select(
+        pitch_type,
+        pitch_tto_multiplier
+        )
+    
+    return(pitch_tto_selection_multiplier_df)
+    }
+
+pitch_count_leverage_selection_multiplier_df <- function(static_model, leverage) {
+
+    pitch_count_leverage_general_usage_df <- static_model$general_usage
+
+    if (leverage == 'behind') {
+        pitch_leverage_usage_df <- static_model$behind_count_usage
+        } 
+    else if (leverage == 'even') {
+        pitch_leverage_usage_df <- static_model$even_count_usage
+        } 
+    else {
+        pitch_leverage_usage_df <- static_model$ahead_count_usage
+        }
+
+    pitch_count_leverage_selection_multiplier_df <- pitch_count_leverage_general_usage_df %>%
+    left_join(
+        pitch_leverage_usage_df,
+        by='pitch_type'
+        ) %>%
+    mutate(
+        pitch_leverage_multiplier = pitch_leverage_usage / pitch_general_usage
+        ) %>%
+    select(
+        pitch_type,
+        pitch_leverage_multiplier
+        )
+    
+    return(pitch_count_leverage_selection_multiplier_df)
+    }

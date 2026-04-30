@@ -1,3 +1,15 @@
+library(DBI)
+library(RPostgres)
+library(tidyverse)
+library(glue)
+library(httr)
+library(jsonlite)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(stringr)
+library(ggplot2)
+library(readr)
 
 pitcher_static_model <- function(pitcher_statcast_df) {
     
@@ -8,6 +20,9 @@ pitcher_static_model <- function(pitcher_statcast_df) {
         count_usage = pitch_count_usage(pitcher_statcast_df),
         handedness_usage = pitch_handedness_usage(pitcher_statcast_df),
         tto_usage = pitch_tto_usage(pitcher_statcast_df),
+        behind_count_usage = pitch_behind_count_usage(pitcher_statcast_df),
+        even_count_usage = pitch_even_count_usage(pitcher_statcast_df),
+        ahead_count_usage = pitch_ahead_count_usage(pitcher_statcast_df),
         base_runners_on_usage = pitch_base_runners_on_usage(pitcher_statcast_df),
         base_runners_off_usage = pitch_base_runners_off_usage(pitcher_statcast_df),
         base_runners_scoring_position_usage = pitch_base_runners_scoring_position_usage(pitcher_statcast_df),
@@ -361,4 +376,86 @@ pitch_tto_usage <- function(pitcher_df) {
         pitch_tto_usage = pitch_perc_usage
         )
     return(pitch_tto_usage_df)
+    }
+
+pitch_behind_count_usage <- function(pitcher_df) {
+    
+    pitch_behind_count_df <- pitcher_df %>%
+    filter(balls > strikes,
+           !(balls == 3 & strikes == 2)
+          )%>%
+    group_by(
+        pitch_type
+        ) %>%
+    summarise(
+        total_pitch_count = n(),
+        .groups='drop_last'
+        ) %>%
+    mutate(
+        pitch_perc_usage = total_pitch_count / sum(total_pitch_count)
+        ) %>%
+    select(
+        -total_pitch_count
+        ) %>%
+    arrange(
+        pitch_perc_usage
+        ) %>%
+    rename(
+        pitch_leverage_usage = pitch_perc_usage
+        )
+    return(pitch_behind_count_df)
+    }
+
+pitch_even_count_usage <- function(pitcher_df) {
+    pitch_even_count_df <- pitcher_df %>%
+    filter(balls == strikes | (balls == 3 & strikes == 2),
+           !(balls == 0 & strikes == 0)
+          )%>%
+    group_by(
+        pitch_type
+        ) %>%
+    summarise(
+        total_pitch_count = n(),
+        .groups='drop_last'
+        ) %>%
+    mutate(
+        pitch_perc_usage = total_pitch_count / sum(total_pitch_count)
+        ) %>%
+    select(
+        -total_pitch_count
+        ) %>%
+    arrange(
+        pitch_perc_usage
+        ) %>%
+    rename(
+        pitch_leverage_usage = pitch_perc_usage
+        )
+    return (pitch_even_count_df)
+    }
+
+pitch_ahead_count_usage <- function(pitcher_df) {
+
+    pitch_ahead_count_df <- pitcher_df %>%
+    filter(balls < strikes
+          )%>%
+    group_by(
+        pitch_type
+        ) %>%
+    summarise(
+        total_pitch_count = n(),
+        .groups='drop_last'
+        ) %>%
+    mutate(
+        pitch_perc_usage = total_pitch_count / sum(total_pitch_count)
+        ) %>%
+    select(
+        -total_pitch_count
+        ) %>%
+    arrange(
+        pitch_perc_usage
+        ) %>%
+    rename(
+        pitch_leverage_usage = pitch_perc_usage
+        )
+    return(pitch_ahead_count_df)
     }
