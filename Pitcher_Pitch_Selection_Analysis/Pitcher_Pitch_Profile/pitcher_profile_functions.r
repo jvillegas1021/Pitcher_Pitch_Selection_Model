@@ -183,7 +183,7 @@ create_pitcher_pitch_performance_profile <- function(pitcher_df) {
 
 
 
-create_pitcher_pitch_location_profile <- function(pitcher_df) {
+create_pitcher_pitch_zone_profile <- function(pitcher_df) {
     return
     }
 
