@@ -280,7 +280,7 @@ create_pitch_tendency_plots <- function(pitcher_df) {
     
     pitch_count_heatmap_plot <- ggplot(heatmap_df_long, aes(x = pitch_type, y = count, fill = prob)) +
         geom_tile(color = "white") +
-        scale_fill_viridis_c(option = "D") +
+        scale_fill_viridis_c(option = "H") +
         labs(
             title = "Pitch Tendencies by Count",
             x = "Pitch Type",
@@ -305,7 +305,7 @@ create_pitch_tendency_plots <- function(pitcher_df) {
 
     pitch_stance_heatmap_plot <- ggplot(heatmap_stance, aes(x = pitch_type, y = count, fill = prob)) +
         geom_tile(color = "white") +
-        scale_fill_viridis_c(option = "C") +
+        scale_fill_viridis_c(option = "H") +
         facet_wrap(~ stance) +
         labs(
             title = "Pitch Tendencies by Count and Batter Stance",
@@ -331,7 +331,7 @@ create_pitch_tendency_plots <- function(pitcher_df) {
 
     pitch_tto_heatmap_plot <- ggplot(heatmap_tto, aes(x = pitch_type, y = count, fill = prob)) +
         geom_tile(color = "white") +
-        scale_fill_viridis_c(option = "C") +
+        scale_fill_viridis_c(option = "H") +
         facet_wrap(~ tto) +
         labs(
             title = "Pitch Tendencies by Count and Times Through Order",
