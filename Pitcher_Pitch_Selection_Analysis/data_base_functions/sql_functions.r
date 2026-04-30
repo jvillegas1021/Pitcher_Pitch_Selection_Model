@@ -25,7 +25,7 @@ read_df_from_sql <- function(table_name) {
         sslmode  = "require"   # Neon requires SSL
         )
 
-    df <- dbWriteTable(conn, table_name)
+    df <- dbReadTable(conn, table_name)
 
     dbDisconnect(conn)
 
