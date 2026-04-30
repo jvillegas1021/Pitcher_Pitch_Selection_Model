@@ -35,6 +35,7 @@ run_pitcher_scouting_report <- function(pitcher_id, statcast_df) {
     risp_list <- c(FALSE, TRUE)
     prev_result_list <- c('B', 'S')
     prev_pitch_list <- pitch_types$pitch_type
+    leverage <- 'even'
     
     situation_row_list <- list()
     
@@ -63,6 +64,7 @@ run_pitcher_scouting_report <- function(pitcher_id, statcast_df) {
                                     runners,
                                     risp,
                                     tto,
+                                    leverage,
                                     NA_character_,
                                     NA_character_
                                 )
@@ -78,7 +80,17 @@ run_pitcher_scouting_report <- function(pitcher_id, statcast_df) {
                                     # Skip illegal states
                                     if (ball > 0 && strike == 0 && prev_result == "S") next
                                     if (ball == 0 && strike > 0 && prev_result == "B") next
-    
+                                    # Set leverage
+                                    if (ball == strike || (ball == 3 & strike == 2)) {
+                                        leverage <- 'even'
+                                        }
+                                    else if (ball > strike && !(ball == 3 & strike == 2)) {
+                                        leverage <- 'behind'
+                                        }
+                                    else {
+                                        leverage <- 'ahead'
+                                        }
+                                        
                                     situation_row <- build_situation_row(
                                         pitcher_data,
                                         pitcher_static_data,
@@ -88,6 +100,7 @@ run_pitcher_scouting_report <- function(pitcher_id, statcast_df) {
                                         runners,
                                         risp,
                                         tto,
+                                        leverage,
                                         prev_pitch,
                                         prev_result
                                     )
@@ -104,7 +117,7 @@ run_pitcher_scouting_report <- function(pitcher_id, statcast_df) {
     
     scouting_report <- bind_rows(situation_row_list)
     
-    pitch_columns <- setdiff(names(scouting_report), c('balls', 'strikes', 'stance', 'runners_on', 'risp', 'tto', 'prev_pitch', 'prev_result'))
+    pitch_columns <- setdiff(names(scouting_report), c('balls', 'strikes', 'stance', 'runners_on', 'risp', 'tto', 'count_leverage', 'prev_pitch', 'prev_result'))
     
     scouting_report_cleaned <- scouting_report %>%
     filter(
