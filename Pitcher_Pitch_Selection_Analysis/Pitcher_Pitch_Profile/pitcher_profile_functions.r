@@ -252,6 +252,9 @@ create_pitcher_pitch_plots <- function(pitcher_df) {
       coord_fixed(xlim = c(-2, 2), ylim = c(0, 4)) +
       theme_minimal()
 
+
+
+
     return(
         list(
         pitch_location = pitch_general_location,
@@ -261,7 +264,121 @@ create_pitcher_pitch_plots <- function(pitcher_df) {
            )
 }
 
+create_pitch_tendency_plots <- function(pitcher_df) {
+        ########## PITCH COUNT HEAT MAP ####################
+    heatmap_df <- pitcher_df %>%
+    mutate(count = paste0(balls, "-", strikes)) %>%
+    group_by(count, pitch_type) %>%
+    summarise(prob = mean(probability), .groups = "drop") %>%
+    mutate(count = factor(count, levels = c("0-0","1-0","2-0","3-0",
+                                            "0-1","1-1","2-1","3-1",
+                                            "0-2","1-2","2-2","3-2"))) %>%
+    pivot_wider(names_from = pitch_type, values_from = prob)
 
+    heatmap_df_long <- heatmap_df %>%
+        pivot_longer(-count, names_to = "pitch_type", values_to = "prob")
+    
+    pitch_count_heatmap_plot <- ggplot(heatmap_df_long, aes(x = pitch_type, y = count, fill = prob)) +
+        geom_tile(color = "white") +
+        scale_fill_viridis_c(option = "D") +
+        labs(
+            title = "Pitch Tendencies by Count",
+            x = "Pitch Type",
+            y = "Count",
+            fill = "Probability (%)"
+        ) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+    ################### PITCH STANCE ########################
+    heatmap_stance <- pitcher_df %>%
+    mutate(count = paste0(balls, "-", strikes)) %>%
+    group_by(stance, count, pitch_type) %>%
+    summarise(prob = mean(probability), .groups = "drop") %>%
+    mutate(
+        count = factor(count, levels = c(
+            "0-0","1-0","2-0","3-0",
+            "0-1","1-1","2-1","3-1",
+            "0-2","1-2","2-2","3-2"
+        ))
+    )
+
+    pitch_stance_heatmap_plot <- ggplot(heatmap_stance, aes(x = pitch_type, y = count, fill = prob)) +
+        geom_tile(color = "white") +
+        scale_fill_viridis_c(option = "C") +
+        facet_wrap(~ stance) +
+        labs(
+            title = "Pitch Tendencies by Count and Batter Stance",
+            x = "Pitch Type",
+            y = "Count",
+            fill = "Probability (%)"
+        ) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+    #################### PITCH TIME THRU ORDER #######################
+    heatmap_tto <- pitcher_df %>%
+    mutate(count = paste0(balls, "-", strikes)) %>%
+    group_by(tto, count, pitch_type) %>%
+    summarise(prob = mean(probability), .groups = "drop") %>%
+    mutate(
+        count = factor(count, levels = c(
+            "0-0","1-0","2-0","3-0",
+            "0-1","1-1","2-1","3-1",
+            "0-2","1-2","2-2","3-2"
+        ))
+    )
+
+    pitch_tto_heatmap_plot <- ggplot(heatmap_tto, aes(x = pitch_type, y = count, fill = prob)) +
+        geom_tile(color = "white") +
+        scale_fill_viridis_c(option = "C") +
+        facet_wrap(~ tto) +
+        labs(
+            title = "Pitch Tendencies by Count and Times Through Order",
+            x = "Pitch Type",
+            y = "Count",
+            fill = "Probability (%)"
+        ) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+    ##################### PITCH COUNT GRID ########################
+    count_df <- pitcher_df %>%
+    mutate(count = paste0(balls, "-", strikes)) %>%
+    group_by(count) %>%
+    slice_max(probability, n = 1, with_ties = FALSE) %>%
+    ungroup() %>%
+    mutate(
+        balls = as.integer(substr(count, 1, 1)),
+        strikes = as.integer(substr(count, 3, 3)),
+        count = factor(count, levels = c(
+            "0-0","1-0","2-0","3-0",
+            "0-1","1-1","2-1","3-1",
+            "0-2","1-2","2-2","3-2"
+        ))
+    )
+    
+    pitch_count_grid <- ggplot(count_df, aes(x = strikes, y = balls, fill = pitch_type)) +
+        geom_tile(color = "white", linewidth = 0.7) +
+        geom_text(aes(label = pitch_type), color = "black", fontface = "bold") +
+        scale_y_reverse(breaks = 0:3) +
+        scale_x_continuous(breaks = 0:2) +
+        labs(
+            title = "Most Likely Pitch by Count",
+            x = "Strikes",
+            y = "Balls"
+        ) +
+        theme_minimal(base_size = 14) +
+        theme(
+            panel.grid = element_blank(),
+            axis.text.x = element_text(size = 12),
+            axis.text.y = element_text(size = 12)
+        )
+    
+    return(pitch_count_heatmap_plot)
+    }
 
 
 
