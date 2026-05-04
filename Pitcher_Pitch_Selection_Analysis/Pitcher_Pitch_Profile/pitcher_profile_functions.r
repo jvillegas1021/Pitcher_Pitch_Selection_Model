@@ -49,7 +49,7 @@ create_pitcher_pitch_characteristics_df <- function(pitcher_statcast_df) {
     return(pitch_characteristics_df)
 }
 
-create_pitcher_pitch_performance_profile <- function(pitcher_statcast_df) {
+create_pitcher_pitch_performance_df <- function(pitcher_statcast_df) {
     
     strike_zone = seq(1,9)
 
