@@ -147,7 +147,7 @@ final_all_pitcher_reports_df <- all_pitcher_reports_df %>%
         prev_pitch_name, .after = prev_pitch
     ) %>%
     rename(
-        prevpitch_type = prev_pitch
+        prev_pitch_type = prev_pitch
         )
 
 
