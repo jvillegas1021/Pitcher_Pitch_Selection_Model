@@ -1,10 +1,3 @@
-filter_to_current_pitcher_cleaned <- function(pitcher_id, statcast_df) {
-    pitcher_df <- statcast_df %>%
-    filter(pitcher == pitcher_id) %>%
-    drop_na(pitch_type)
-
-    return(pitcher_df)
-    }
 
 create_pitcher_pitch_arsenal <- function(pitcher_scouting_report_df) {
     pitch_type_list <- pitcher_scouting_report_df %>%
@@ -18,28 +11,23 @@ create_pitcher_pitch_arsenal <- function(pitcher_scouting_report_df) {
     return(pitch_type_list)
     }
  
-create_pitcher_pitch_usage_profile <- function(pitcher_df) {
-    pitch_usage_df <- pitcher_df %>%
+create_pitcher_pitch_usage_df <- function(pitcher_statcast_df) {
+    pitch_usage_df <- pitcher_statcast_df %>%
     group_by(pitch_type,
              pitch_name) %>%
     summarise(total_count = n(),
               .groups='drop'
               ) %>%
-    mutate(pitch_usage = total_count / sum(total_count)) %>%
-    filter(pitch_usage >= 0.1) %>%
+    mutate(pitch_usage = round(total_count / sum(total_count) * 100, 2)) %>%
     select(pitch_type,
            pitch_name,
            pitch_usage
            )
-
-    filtered_statcast_df <- pitcher_df %>%
-    filter(pitch_type %in% pitch_usage_df$pitch_type)
-    
-    return(list(pitch_usage_df, filtered_statcast_df))
+    return(pitch_usage_df)
     }
 
-create_pitcher_pitch_characteristics_profile <- function(pitcher_df) {
-    pitch_characteristics_df <- pitcher_df %>%
+create_pitcher_pitch_characteristics_df <- function(pitcher_statcast_df) {
+    pitch_characteristics_df <- pitcher_statcast_df %>%
     group_by(pitch_type, pitch_name) %>%
     summarise(
       avg_velo = round(mean(release_speed, na.rm = TRUE), 2),
