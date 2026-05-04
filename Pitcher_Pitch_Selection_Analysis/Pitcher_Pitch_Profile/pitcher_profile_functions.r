@@ -49,7 +49,7 @@ create_pitcher_pitch_characteristics_df <- function(pitcher_statcast_df) {
     return(pitch_characteristics_df)
 }
 
-create_pitcher_pitch_performance_profile <- function(pitcher_df) {
+create_pitcher_pitch_performance_profile <- function(pitcher_statcast_df) {
     
     strike_zone = seq(1,9)
 
@@ -87,10 +87,10 @@ create_pitcher_pitch_performance_profile <- function(pitcher_df) {
         'home_run'
     )
 
-    total_first_pitches <- sum(pitcher_df$pitch_number ==1)
+    total_first_pitches <- sum(pitcher_statcast_df$pitch_number ==1)
     total_two_strike_pitches <- 
     
-    pitcher_performance_df <- pitcher_df %>%
+    pitcher_performance_df <- pitcher_statcast_df %>%
     group_by(pitch_type, pitch_name) %>%
     summarise(total_thrown = n(),
               pitches_in_zone = sum(zone %in% strike_zone),
