@@ -6,6 +6,18 @@ filter_to_current_pitcher_cleaned <- function(pitcher_id, statcast_df) {
     return(pitcher_df)
     }
 
+create_pitcher_pitch_arsenal <- function(pitcher_scouting_report_df) {
+    pitch_type_list <- pitcher_scouting_report_df %>%
+    group_by(pitch_type) %>%
+    summarise(total_pitch_count = n(),
+             .groups='drop') %>%
+    mutate(pitch_perc_usage = total_pitch_count / sum(total_pitch_count)) %>%
+    filter(pitch_perc_usage >= .1) %>%
+    pull(pitch_type)
+
+    return(pitch_type_list)
+    }
+ 
 create_pitcher_pitch_usage_profile <- function(pitcher_df) {
     pitch_usage_df <- pitcher_df %>%
     group_by(pitch_type,
