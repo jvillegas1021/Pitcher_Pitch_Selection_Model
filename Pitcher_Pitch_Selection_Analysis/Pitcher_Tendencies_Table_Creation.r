@@ -21,7 +21,7 @@ source("sql_functions.r")
 
 
 
-statcast_data <- #READ FROM SQL LAKE
+statcast_data <- read_csv()
 
 # clean data
 
@@ -127,7 +127,7 @@ pitch_names <- statcast_data %>%
         pitch_name
         )
 
-new_all_pitcher_reports_df <- all_pitcher_reports_df %>%
+final_all_pitcher_reports_df <- all_pitcher_reports_df %>%
     left_join(
         pitch_names,
         by = "pitch_type"
@@ -145,9 +145,11 @@ new_all_pitcher_reports_df <- all_pitcher_reports_df %>%
     ) %>%
     relocate(
         prev_pitch_name, .after = prev_pitch
-    )
+    ) %>%
+    rename(
+        prevpitch_type = prev_pitch
+        )
 
-final_all_pitcher_reports_df
 
 sql_table_name <- 'pitcher_scouting_reports'
 
