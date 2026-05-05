@@ -214,6 +214,7 @@ create_pitcher_pitch_zone_profile <- function(pitcher_df) {
     }
 
 create_pitcher_usage_plots <- function(pitcher_pitch_usage_df) {
+    
     pitcher_general_usage_plot <- ggplot(pitcher_pitch_usage_df[[1]], 
                                         aes(x = "", y = pitch_usage, fill = pitch_name)) +
                                         geom_col(width = 1, color = "black") +
@@ -252,7 +253,38 @@ create_pitcher_usage_plots <- function(pitcher_pitch_usage_df) {
                 pitcher_usage_vs_lhb_plot))
     }
 
-  
+create_pitcher_pitch_characteristics_plots <- function(pitcher_statcast_df) {
+    
+    pitch_velo_spin_plot <- ggplot(pitcher_pitch_characteristics_df,
+                                aes(x = avg_velo, y = avg_spin, color = pitch_name)) +
+                                geom_point(size = 10, shape = 21, fill = "white", stroke = 1.2) +
+                                geom_text(aes(label = pitch_type),
+                                    size = 4,
+                                    fontface = "bold",
+                                    show.legend = FALSE) + 
+                                labs(
+                                title = "Pitch Velocity and Spin Rate Average",
+                                x = "Average Velocity",
+                                y = "Average Spin Rate",
+                                color = "Pitch Name"
+                                ) +
+                                theme_minimal(base_size = 14) +
+                                theme(
+                                    plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
+                                    axis.title = element_text(face = "bold"),
+                                    panel.grid = element_blank(),
+                                    legend.position = "bottom",
+                                    legend.title = element_text(face = "bold"),
+                                    panel.border = element_rect(color = "black", fill = NA)
+                                )
+
+
+
+
+
+
+
+    
 create_pitcher_pitch_visual_plots <- function(pitcher_statcast_df) {
     ### WHERE PITCHES THROWN
 
