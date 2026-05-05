@@ -1,18 +1,11 @@
 
 create_pitcher_pitch_arsenal <- function(pitcher_scouting_report_df) {
-    pitch_type_list <- pitcher_scouting_report_df %>%
-    group_by(pitch_type) %>%
-    summarise(total_pitch_count = n(),
-             .groups='drop') %>%
-    mutate(pitch_perc_usage = total_pitch_count / sum(total_pitch_count)) %>%
-    filter(pitch_perc_usage >= .1) %>%
-    pull(pitch_type)
-
+    pitch_type_list <- unique(pitcher_scouting_report_df$pitch_type)
     return(pitch_type_list)
     }
  
 create_pitcher_pitch_usage_df <- function(pitcher_statcast_df) {
-    pitch_usage_df <- pitcher_statcast_df %>%
+    pitch_general_usage_df <- pitcher_statcast_df %>%
     group_by(pitch_type,
              pitch_name) %>%
     summarise(total_count = n(),
@@ -23,11 +16,40 @@ create_pitcher_pitch_usage_df <- function(pitcher_statcast_df) {
            pitch_name,
            pitch_usage
            )
-    return(pitch_usage_df)
+
+    pitch_usage_vs_rhb_df <- pitcher_statcast_df %>%
+    filter(stand == 'R') %>%
+    group_by(pitch_type,
+             pitch_name) %>%
+    summarise(total_count = n(),
+              .groups='drop'
+              ) %>%
+    mutate(pitch_usage = round(total_count / sum(total_count) * 100, 2)) %>%
+    select(pitch_type,
+           pitch_name,
+           pitch_usage
+           )
+
+    pitch_usage_vs_lhb_df <- pitcher_statcast_df %>%
+    filter(stand == 'L') %>%
+    group_by(pitch_type,
+             pitch_name) %>%
+    summarise(total_count = n(),
+              .groups='drop'
+              ) %>%
+    mutate(pitch_usage = round(total_count / sum(total_count) * 100, 2)) %>%
+    select(pitch_type,
+           pitch_name,
+           pitch_usage
+           )
+    
+    return(list(pitch_general_usage_df,
+               pitch_usage_vs_rhb_df,
+               pitch_usage_vs_lhb_df))
     }
 
 create_pitcher_pitch_characteristics_df <- function(pitcher_statcast_df) {
-    pitch_characteristics_df <- pitcher_statcast_df %>%
+    pitch_general_characteristics_df <- pitcher_statcast_df %>%
     group_by(pitch_type, pitch_name) %>%
     summarise(
       avg_velo = round(mean(release_speed, na.rm = TRUE), 2),
@@ -46,10 +68,12 @@ create_pitcher_pitch_characteristics_df <- function(pitcher_statcast_df) {
         .groups='drop'
     )
 
-    return(pitch_characteristics_df)
-}
+    return(pitch_general_characteristics_df)
+    }
 
 create_pitcher_pitch_performance_df <- function(pitcher_statcast_df) {
+
+    stance_list = c('R', 'L')
     
     strike_zone = seq(1,9)
 
@@ -87,8 +111,10 @@ create_pitcher_pitch_performance_df <- function(pitcher_statcast_df) {
         'home_run'
     )
 
+    ############## statcast, stance #######################
+    
     total_first_pitches <- sum(pitcher_statcast_df$pitch_number ==1)
-    total_two_strike_pitches <- 
+    
     
     pitcher_performance_df <- pitcher_statcast_df %>%
     group_by(pitch_type, pitch_name) %>%
@@ -187,10 +213,50 @@ create_pitcher_pitch_zone_profile <- function(pitcher_df) {
     return
     }
 
-create_pitcher_pitch_plots <- function(pitcher_df) {
+create_pitcher_usage_plots <- function(pitcher_pitch_usage_df) {
+    pitcher_general_usage_plot <- ggplot(pitcher_pitch_usage_df[[1]], 
+                                        aes(x = "", y = pitch_usage, fill = pitch_name)) +
+                                        geom_col(width = 1, color = "black") +
+                                        coord_polar(theta = "y") +
+                                        theme_void() +
+                                        labs(title = "Pitch General Usage", fill = 'Pitch Name') + 
+                                        geom_text(
+                                            aes(label = paste0(pitch_usage, " %")),
+                                            position = position_stack(vjust = 0.5)
+                                        )
+
+    pitcher_usage_vs_rhb_plot <- ggplot(pitcher_pitch_usage_df[[2]], 
+                                        aes(x = "", y = pitch_usage, fill = pitch_name)) +
+                                        geom_col(width = 1, color = "black") +
+                                        coord_polar(theta = "y") +
+                                        theme_void() +
+                                        labs(title = "Pitch Usage vs RHB", fill = 'Pitch Name') + 
+                                        geom_text(
+                                            aes(label = paste0(pitch_usage, " %")),
+                                            position = position_stack(vjust = 0.5)
+                                        )
+
+    pitcher_usage_vs_lhb_plot <- ggplot(pitcher_pitch_usage_df[[3]], 
+                                        aes(x = "", y = pitch_usage, fill = pitch_name)) +
+                                        geom_col(width = 1, color = "black") +
+                                        coord_polar(theta = "y") +
+                                        theme_void() +
+                                        labs(title = "Pitch Usage vs LHB", fill = 'Pitch Name') + 
+                                        geom_text(
+                                            aes(label = paste0(pitch_usage, " %")),
+                                            position = position_stack(vjust = 0.5)
+                                        )
+
+    return(list(pitcher_general_usage_plot,
+                pitcher_usage_vs_rhb_plot,
+                pitcher_usage_vs_lhb_plot))
+    }
+
+  
+create_pitcher_pitch_visual_plots <- function(pitcher_statcast_df) {
     ### WHERE PITCHES THROWN
 
-    pitch_general_location <- ggplot(pitcher_df, aes(plate_x, plate_z)) +
+    pitch_general_location <- ggplot(pitcher_statcast_df, aes(plate_x, plate_z)) +
       stat_density_2d_filled(bins = 20, show.legend = FALSE) +
       facet_grid(stand ~ pitch_name) +
       annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
@@ -200,7 +266,7 @@ create_pitcher_pitch_plots <- function(pitcher_df) {
 
     # WHERE PITCHES ARE CONTACTED!
 
-    contact_df <- pitcher_df %>% filter(description == 'hit_into_play')
+    contact_df <- pitcher_statcast_df %>% filter(description == 'hit_into_play')
     
     pitch_contact_location <- ggplot(contact_df, aes(plate_x, plate_z)) +
       stat_density_2d_filled(bins = 20, show.legend = FALSE) +
@@ -213,7 +279,7 @@ create_pitcher_pitch_plots <- function(pitcher_df) {
     
     # WHERE PITCHES ARE MISSED THE MOST
 
-    whiff_df <- pitcher_df %>% filter(description %in% c('swinging_strike', 'swinging_strike_blocked'))
+    whiff_df <- pitcher_statcast_df %>% filter(description %in% c('swinging_strike', 'swinging_strike_blocked'))
 
     pitch_whiff_location <- ggplot(contact_df, aes(plate_x, plate_z)) +
       stat_density_2d_filled(bins = 20, show.legend = FALSE) +
@@ -225,7 +291,7 @@ create_pitcher_pitch_plots <- function(pitcher_df) {
 
     # WEAK CONTACT, VS HARD CONTACT
 
-    hit_hard_df <- pitcher_df %>%
+    hit_hard_df <- pitcher_statcast_df %>%
     filter(type == 'X') %>%
     mutate(hard_hit = launch_speed >= 95)
     
@@ -264,9 +330,9 @@ create_pitcher_pitch_plots <- function(pitcher_df) {
            )
 }
 
-create_pitch_tendency_plots <- function(pitcher_df) {
+create_pitch_tendency_plots <- function(pitcher_scouting_report_df) {
         ########## PITCH COUNT HEAT MAP ####################
-    heatmap_df <- pitcher_df %>%
+    heatmap_df <- pitcher_scouting_report_df %>%
     mutate(count = paste0(balls, "-", strikes)) %>%
     group_by(stance, count, pitch_type) %>%
     summarise(prob = mean(probability), .groups = "drop") %>%
@@ -291,7 +357,7 @@ create_pitch_tendency_plots <- function(pitcher_df) {
 
 
     #################### PITCH TIME THRU ORDER #######################
-    heatmap_tto <- pitcher_df %>%
+    heatmap_tto <- pitcher_scouting_report_df %>%
     mutate(count = paste0(balls, "-", strikes)) %>%
     group_by(tto, count, pitch_type) %>%
     summarise(prob = mean(probability), .groups = "drop") %>%
@@ -318,9 +384,9 @@ create_pitch_tendency_plots <- function(pitcher_df) {
 
 
     ##################### PITCH COUNT GRID ########################
-    count_df <- pitcher_df %>%
+    count_df <- pitcher_scouting_report_df %>%
     mutate(count = paste0(balls, "-", strikes)) %>%
-    group_by(count) %>%
+    group_by(stance, count) %>%
     slice_max(probability, n = 1, with_ties = FALSE) %>%
     ungroup() %>%
     mutate(
@@ -338,6 +404,7 @@ create_pitch_tendency_plots <- function(pitcher_df) {
         geom_text(aes(label = pitch_type), color = "black", fontface = "bold") +
         scale_y_reverse(breaks = 0:3) +
         scale_x_continuous(breaks = 0:2) +
+        facet_wrap(~ stance) +
         labs(
             title = "Most Likely Pitch by Count",
             x = "Strikes",
@@ -349,8 +416,10 @@ create_pitch_tendency_plots <- function(pitcher_df) {
             axis.text.x = element_text(size = 12),
             axis.text.y = element_text(size = 12)
         )
-    
-    return(pitch_count_heatmap_plot)
+    return(list(pitch_count_heatmap_plot,
+                pitch_tto_heatmap_plot,
+                pitch_count_grid)
+           )
     }
 
 
