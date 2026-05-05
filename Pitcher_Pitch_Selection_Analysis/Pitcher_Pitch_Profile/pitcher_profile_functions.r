@@ -52,19 +52,21 @@ create_pitcher_pitch_characteristics_df <- function(pitcher_statcast_df) {
     pitch_general_characteristics_df <- pitcher_statcast_df %>%
     group_by(pitch_type, pitch_name) %>%
     summarise(
-      avg_velo = round(mean(release_speed, na.rm = TRUE), 2),
-      avg_rel_x = round(mean(release_pos_x, na.rm = TRUE), 2),
-      avg_rel_y = round(mean(release_pos_y, na.rm = TRUE), 2),
-      avg_rel_z = round(mean(release_pos_z, na.rm = TRUE), 2),
-      avg_hmov = round(mean(pfx_x, na.rm = TRUE), 2),
-      avg_vmov = round(mean(pfx_z, na.rm = TRUE), 2),
-      avg_vx0 = round(mean(vx0, na.rm = TRUE), 2),
-      avg_vy0 = round(mean(vy0, na.rm = TRUE), 2),
-      avg_vz0 = round(mean(vz0, na.rm = TRUE), 2),
-      avg_ax = round(mean(ax, na.rm = TRUE), 2),
-      avg_ay = round(mean(ay, na.rm = TRUE), 2),
-      avg_az = round(mean(az, na.rm = TRUE), 2),
-      avg_spin = mean(release_spin_rate, na.rm = TRUE),
+        avg_velo = round(mean(release_speed, na.rm = TRUE), 2),
+        avg_rel_x = round(mean(release_pos_x, na.rm = TRUE), 2),
+        avg_rel_y = round(mean(release_pos_y, na.rm = TRUE), 2),
+        avg_rel_z = round(mean(release_pos_z, na.rm = TRUE), 2),
+        avg_plate_x = round(mean(plate_x, na.rm = TRUE), 2),
+        avg_plate_z = round(mean(plate_z, na.rm = TRUE), 2),
+        avg_hmov = round(mean(pfx_x, na.rm = TRUE), 2),
+        avg_vmov = round(mean(pfx_z, na.rm = TRUE), 2),
+        avg_vx0 = round(mean(vx0, na.rm = TRUE), 2),
+        avg_vy0 = round(mean(vy0, na.rm = TRUE), 2),
+        avg_vz0 = round(mean(vz0, na.rm = TRUE), 2),
+        avg_ax = round(mean(ax, na.rm = TRUE), 2),
+        avg_ay = round(mean(ay, na.rm = TRUE), 2),
+        avg_az = round(mean(az, na.rm = TRUE), 2),
+        avg_spin = mean(release_spin_rate, na.rm = TRUE),
         .groups='drop'
     )
 
@@ -253,7 +255,7 @@ create_pitcher_usage_plots <- function(pitcher_pitch_usage_df) {
                 pitcher_usage_vs_lhb_plot))
     }
 
-create_pitcher_pitch_characteristics_plots <- function(pitcher_statcast_df) {
+create_pitcher_pitch_characteristics_plots <- function(pitcher_pitch_characteristics_df) {
     
     pitch_velo_spin_plot <- ggplot(pitcher_pitch_characteristics_df,
                                 aes(x = avg_velo, y = avg_spin, color = pitch_name)) +
@@ -261,25 +263,49 @@ create_pitcher_pitch_characteristics_plots <- function(pitcher_statcast_df) {
                                 geom_text(aes(label = pitch_type),
                                     size = 4,
                                     fontface = "bold",
-                                    show.legend = FALSE) + 
+                                    show.legend = FALSE) +
                                 labs(
                                 title = "Pitch Velocity and Spin Rate Average",
                                 x = "Average Velocity",
                                 y = "Average Spin Rate",
-                                color = "Pitch Name"
+                                color = NULL   # ← removes legend title
                                 ) +
                                 theme_minimal(base_size = 14) +
                                 theme(
-                                    plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
-                                    axis.title = element_text(face = "bold"),
-                                    panel.grid = element_blank(),
-                                    legend.position = "bottom",
-                                    legend.title = element_text(face = "bold"),
-                                    panel.border = element_rect(color = "black", fill = NA)
+                                plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
+                                axis.title = element_text(face = "bold"),
+                                panel.grid = element_blank(),
+                                legend.position = "bottom",
+                                legend.title = element_blank(),   # ← also removes legend title
+                                panel.border = element_rect(color = "black", fill = NA)
                                 )
 
+    ggplot(pitcher_pitch_characteristics_df, aes(color = pitch_name)) +
+  geom_segment(aes(
+    x = avg_rel_x, y = avg_rel_z,
+    xend = avg_plate_x, yend = avg_plate_z
+  ), linewidth = 1) +
+  geom_point(aes(x = avg_rel_x, y = avg_rel_z), size = 4, shape = 21, fill = "white") +
+  geom_point(aes(x = avg_plate_x, y = avg_plate_z), size = 4) +
+  coord_fixed(xlim = c(-3.5, 3.5), ylim = c(-1, 8)) +
+  annotate("rect",
+           xmin = -0.85, xmax = 0.85,
+           ymin = 1.5, ymax = 3.5,
+           fill = NA, color = "black",
+           linetype = "dashed", linewidth = 1) +
+  labs(
+    x = "Horizontal Position (ft)",
+    y = "Vertical Position (ft)",
+    color = 'Pitch Name'
+  ) +
+  theme(
+      plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
+      axis.title = element_text(face = "bold"),
+      panel.grid = element_blank(),
+      panel.border = element_rect(color = "black", fill = NA))
 
 
+}
 
 
 
@@ -452,8 +478,4 @@ create_pitch_tendency_plots <- function(pitcher_scouting_report_df) {
                 pitch_tto_heatmap_plot,
                 pitch_count_grid)
            )
-    }
-
-
-
-       
+}      
