@@ -280,34 +280,103 @@ create_pitcher_pitch_characteristics_plots <- function(pitcher_pitch_characteris
                                 panel.border = element_rect(color = "black", fill = NA)
                                 )
 
-    ggplot(pitcher_pitch_characteristics_df, aes(color = pitch_name)) +
-  geom_segment(aes(
-    x = avg_rel_x, y = avg_rel_z,
-    xend = avg_plate_x, yend = avg_plate_z
-  ), linewidth = 1) +
-  geom_point(aes(x = avg_rel_x, y = avg_rel_z), size = 4, shape = 21, fill = "white") +
-  geom_point(aes(x = avg_plate_x, y = avg_plate_z), size = 4) +
-  coord_fixed(xlim = c(-3.5, 3.5), ylim = c(-1, 8)) +
-  annotate("rect",
-           xmin = -0.85, xmax = 0.85,
-           ymin = 1.5, ymax = 3.5,
-           fill = NA, color = "black",
-           linetype = "dashed", linewidth = 1) +
-  labs(
-    x = "Horizontal Position (ft)",
-    y = "Vertical Position (ft)",
-    color = 'Pitch Name'
-  ) +
-  theme(
-      plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
-      axis.title = element_text(face = "bold"),
-      panel.grid = element_blank(),
-      panel.border = element_rect(color = "black", fill = NA))
+    pitch_release_to_finish_plot <- ggplot(pitcher_pitch_characteristics_df, aes(color = pitch_name)) +
+                                geom_segment(aes(
+                                    x = avg_rel_x,
+                                    y = avg_rel_z,
+                                    xend = avg_plate_x,
+                                    yend = avg_plate_z),
+                                    linewidth = 1, linetype = 'dashed') +
+                                geom_point(aes(x = avg_rel_x, y = avg_rel_z), size = 4, shape = 21, fill = "white") +
+                                geom_point(aes(x = avg_plate_x, y = avg_plate_z), size = 4) +
+                                coord_fixed(xlim = c(-3.5, 3.5), ylim = c(-1, 8)) +
+                                annotate("rect",
+                                       xmin = -0.85, xmax = 0.85,
+                                       ymin = 1.5, ymax = 3.5,
+                                       fill = NA, color = "black",
+                                       linetype = "dashed", linewidth = 1) +
+                                labs(
+                                  title = 'Pitch Avg Release to Avg Finish',
+                                x = "Horizontal Position (ft)",
+                                y = "Vertical Position (ft)",
+                                color = 'Pitch Name'
+                                ) +
+                                theme(
+                                  plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
+                                  axis.title = element_text(face = "bold"),
+                                  panel.grid = element_blank(),
+                                  panel.border = element_rect(color = "black", fill = NA))
 
+
+    return(list(pitch_velo_spin_plot,
+                pitch_release_to_finish_plot))
 
 }
 
+pitcher_radar_acceleration_plot <- function(pitcher_pitch_characteristics_df) {
 
+  # Build the data
+  pitcher_acceleration_radar_df <- pitcher_pitch_characteristics_df %>%
+    select(pitch_type,
+           pitch_name,
+           avg_ax,
+           avg_ay,
+           avg_az) %>%
+    mutate(avg_ax = abs(avg_ax),
+           avg_ay = abs(avg_ay),
+           avg_az = abs(avg_az))
+
+  # Numeric-only radar base
+  radar_base <- pitcher_acceleration_radar_df %>%
+    select(avg_ax, avg_ay, avg_az) %>%
+    rename(
+      Horizontal_Acceleration = avg_ax,
+      Forward_Acceleration    = avg_ay,
+      Vertical_Acceleration   = avg_az
+    ) %>%
+    as.data.frame()
+
+  # Required rows
+  max_row <- apply(radar_base, 2, max)
+  min_row <- apply(radar_base, 2, min)
+
+  # Final radar matrix
+  radar_ready <- rbind(max_row, min_row, radar_base)
+  rownames(radar_ready) <- c("MAX", "MIN", pitcher_acceleration_radar_df$pitch_type)
+
+  # Colors
+  colors <- c("red", "blue", "green", "purple")
+  fills  <- scales::alpha(colors, .4)
+
+  # Wrap the plot in a function so it behaves like a ggplot object
+  radar_plot <- function() {
+    par(mar = c(2, 6, 4, 6))  # prevent label cutoff
+
+    radarchart(
+      radar_ready,
+      axistype = 1,
+      pcol = colors,
+      pfcol = fills,
+      plwd = 3,
+      cglcol = "grey",
+      cglty = 1,
+      axislabcol = "grey",
+      caxislabels = seq(min(min_row), max(max_row), length.out = 5),
+      cglwd = 0.8,
+      vlcex = .7
+    )
+
+    legend(
+      "topright",
+      legend = pitcher_acceleration_radar_df$pitch_type,
+      col = colors,
+      lwd = 2,
+      bty = "n"
+    )
+  }
+
+  return(radar_plot)
+}
 
 
     
