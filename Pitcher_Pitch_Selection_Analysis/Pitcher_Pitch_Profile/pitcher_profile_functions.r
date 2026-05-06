@@ -293,7 +293,7 @@ create_pitcher_pitch_characteristics_plots <- function(pitcher_pitch_characteris
                                 y = "Average Spin Rate",
                                 color = NULL   # ← removes legend title
                                 ) +
-                                theme_minimal(base_size = 14) +
+                                theme_bw(base_size = 14) +
                                 theme(
                                 plot.title = element_text(face = "bold", size = 18, hjust = 0.5),
                                 axis.title = element_text(face = "bold"),
@@ -338,7 +338,7 @@ create_pitcher_pitch_characteristics_plots <- function(pitcher_pitch_characteris
 }
 
 pitcher_radar_acceleration_plot <- function(pitcher_pitch_characteristics_df) {
-    palette <- get_pitch_palette(pitcher_acceleration_radar_df$pitch_name)
+    palette <- get_pitch_palette(pitcher_pitch_characteristics_df$pitch_name)
     
     colors_border <- palette$border
     colors_fill   <- palette$fill
@@ -393,7 +393,7 @@ pitcher_radar_acceleration_plot <- function(pitcher_pitch_characteristics_df) {
     title("Pitch Acceleration Profile")
     legend(
       "topright",
-      legend = pitcher_acceleration_radar_df$pitch_type,
+      legend = pitcher_acceleration_radar_df$pitch_name,
       col = colors_border,
       lwd = 2,
       bty = "n"
@@ -407,6 +407,8 @@ pitcher_radar_acceleration_plot <- function(pitcher_pitch_characteristics_df) {
     
 create_pitcher_pitch_visual_plots <- function(pitcher_statcast_df) {
     ### WHERE PITCHES THROWN
+    pitcher_statcast_df <- pitcher_statcast_df %>%
+    mutate(batter_hand = if_else(stand == 'R', 'RHB', 'LHB'))
     
     pitch_general_location <- ggplot(pitcher_statcast_df, aes(plate_x, plate_z)) +
         stat_density_2d_filled(bins = 20, show.legend = FALSE) +
@@ -415,29 +417,29 @@ create_pitcher_pitch_visual_plots <- function(pitcher_statcast_df) {
         labs(title='Pitch Locations',
             x = "Horizontal Plate Position (ft)",
             y = "Vertical Plate Position (ft)") +
-        facet_grid(stand ~ pitch_name) +
+        facet_grid(batter_hand ~ pitch_name) +
         annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
                fill=NA, color="white", linewidth=1) +
-        coord_fixed() +
-        theme_minimal() +
+        coord_fixed(xlim = c(-2, 2), ylim = c(0, 5)) +
+        theme_bw() +
         theme(panel.grid = element_blank())
 
     # WHERE PITCHES ARE CONTACTED!
 
-    contact_df <- pitcher_statcast_df %>% filter(description == 'hit_into_play')
+    hard_hit_df <- pitcher_statcast_df %>% filter(launch_speed >= 95)
     
-    pitch_contact_location <- ggplot(contact_df, aes(plate_x, plate_z)) +
-        stat_density_2d_filled(bins = 20, show.legend = FALSE) +
+    pitch_hard_hit_location <- ggplot(hard_hit_df, aes(plate_x, plate_z)) +
+        stat_density_2d_filled(bins = 20, show.legend = FALSE)  +
         scale_x_continuous(breaks = NULL) +
         scale_y_continuous(breaks = NULL) +
-        labs(title='Contact Locations',
+        labs(title='Hard Hit Locations',
              x = "Horizontal Plate Position (ft)",
              y = "Vertical Plate Position (ft)") +
-        facet_grid(stand ~ pitch_name) +
+        facet_grid(batter_hand ~ pitch_name) +
         annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
                fill=NA, color="white", linewidth=1) +
         coord_fixed() +
-        theme_minimal() +
+        theme_bw() +
         theme(panel.grid = element_blank())
 
     
@@ -445,72 +447,34 @@ create_pitcher_pitch_visual_plots <- function(pitcher_statcast_df) {
 
     whiff_df <- pitcher_statcast_df %>% filter(description %in% c('swinging_strike', 'swinging_strike_blocked'))
 
-    pitch_whiff_location <- ggplot(contact_df, aes(plate_x, plate_z)) +
+    pitch_whiff_location <- ggplot(whiff_df, aes(plate_x, plate_z)) +
         stat_density_2d_filled(bins = 20, show.legend = FALSE) +
         scale_x_continuous(breaks = NULL) +
         scale_y_continuous(breaks = NULL) +
         labs(title='Whiff Locations',
              x = "Horizontal Plate Position (ft)",
              y = "Vertical Plate Position (ft)") +
-        facet_grid(stand ~ pitch_name) +
+        facet_grid(batter_hand ~ pitch_name) +
         annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
                fill=NA, color="white", linewidth=1) +
         coord_fixed() +
-        theme_minimal() +
+        theme_bw() +
         theme(panel.grid = element_blank())
-
-    # WEAK CONTACT, VS HARD CONTACT
-
-    hit_hard_df <- pitcher_statcast_df %>%
-    filter(type == 'X') %>%
-    mutate(hard_hit = launch_speed >= 95)
-    
-    weak_df <- hit_hard_df %>% filter(!hard_hit)
-    hard_df <- hit_hard_df %>% filter(hard_hit)
-    
-    pitch_hard_vs_weak_location <- ggplot() +
-        stat_density_2d(
-        data = weak_df,
-        aes(plate_x, plate_z, color = "weak"),
-        bins = 10,
-        alpha = 0.8
-        ) +
-        stat_density_2d(
-        data = hard_df,
-        aes(plate_x, plate_z, color = "hard"),
-        bins = 10,
-        alpha = 0.8
-        ) +
-        scale_x_continuous(breaks = NULL) +
-        scale_y_continuous(breaks = NULL) +
-        labs(title='Hard vs Weak Contact Areas',
-             x = "Horizontal Plate Position (ft)",
-             y = "Vertical Plate Position (ft)") +
-        scale_color_manual(values = c("weak" = "cyan", "hard" = "red")) +
-        facet_grid(stand ~ pitch_name) +
-        annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
-               fill=NA, color="black", linewidth=1, linetype = 'dashed') +
-        coord_fixed(xlim = c(-2, 2), ylim = c(0, 4)) +
-        theme_minimal() +
-        theme(panel.grid = element_blank())
-
-
 
 
     return(
         list(
         pitch_location = pitch_general_location,
-        contact_location = pitch_contact_location,
-        whiff_location = pitch_whiff_location,
-        hard_vs_weak_location = pitch_hard_vs_weak_location)
-           )
+        pitch_hard_location = pitch_hard_hit_location,
+        whiff_location = pitch_whiff_location))
 }
 
 create_pitch_tendency_plots <- function(pitcher_scouting_report_df) {
         ########## PITCH COUNT HEAT MAP ####################
     heatmap_df <- pitcher_scouting_report_df %>%
-    mutate(count = paste0(balls, "-", strikes)) %>%
-    group_by(stance, count, pitch_name) %>%
+    mutate(count = paste0(balls, "-", strikes),
+          batter_hand = if_else(stance == 'R', 'RHB', 'LHB')) %>%
+    group_by(batter_hand, count, pitch_name) %>%
     summarise(prob = mean(probability), .groups = "drop") %>%
     mutate(count = factor(count, levels = c("0-0","1-0","2-0","3-0",
                                             "0-1","1-1","2-1","3-1",
@@ -519,7 +483,7 @@ create_pitch_tendency_plots <- function(pitcher_scouting_report_df) {
     pitch_count_heatmap_plot <- ggplot(heatmap_df, aes(x = pitch_name, y = count, fill = prob)) +
         geom_tile(color = "white") +
         scale_fill_viridis_c(option = "H") +
-        facet_wrap(~ stance) +
+        facet_wrap(~ batter_hand) +
         labs(
             title = "Pitch Tendencies by Count",
             x = "Pitch Type",
@@ -561,8 +525,9 @@ create_pitch_tendency_plots <- function(pitcher_scouting_report_df) {
 
     ##################### PITCH COUNT GRID ########################
     count_df <- pitcher_scouting_report_df %>%
-    mutate(count = paste0(balls, "-", strikes)) %>%
-    group_by(stance, count) %>%
+    mutate(count = paste0(balls, "-", strikes),
+          batter_hand = if_else(stance == 'R', 'RHB', 'LHB')) %>%
+    group_by(batter_hand, count) %>%
     slice_max(probability, n = 1, with_ties = FALSE) %>%
     ungroup() %>%
     mutate(
@@ -580,11 +545,12 @@ create_pitch_tendency_plots <- function(pitcher_scouting_report_df) {
         geom_text(aes(label = pitch_type), color = "black", fontface = "bold") +
         scale_y_reverse(breaks = 0:3) +
         scale_x_continuous(breaks = 0:2) +
-        facet_wrap(~ stance) +
+        facet_wrap(~ batter_hand) +
         labs(
             title = "Most Likely Pitch by Count",
             x = "Strikes",
-            y = "Balls"
+            y = "Balls",
+            fill = 'Pitch Name'
         ) +
         theme_minimal(base_size = 14) +
         theme(
