@@ -1,3 +1,15 @@
+get_pitch_palette <- function(pitch_names) {
+  library(RColorBrewer)
+  library(scales)
+
+  n <- length(pitch_names)
+  base_cols <- brewer.pal(max(3, n), "Set2")[1:n]
+
+  list(
+    border = base_cols,
+    fill   = alpha(base_cols, 0.35)
+  )
+}
 
 create_pitcher_pitch_arsenal <- function(pitcher_scouting_report_df) {
     pitch_type_list <- unique(pitcher_scouting_report_df$pitch_type)
@@ -217,38 +229,47 @@ create_pitcher_pitch_zone_profile <- function(pitcher_df) {
 
 create_pitcher_usage_plots <- function(pitcher_pitch_usage_df) {
     
+    palette <- get_pitch_palette(pitcher_pitch_usage_df[[1]]$pitch_name)
+    
+                             
+    
     pitcher_general_usage_plot <- ggplot(pitcher_pitch_usage_df[[1]], 
-                                        aes(x = "", y = pitch_usage, fill = pitch_name)) +
-                                        geom_col(width = 1, color = "black") +
-                                        coord_polar(theta = "y") +
-                                        theme_void() +
-                                        labs(title = "Pitch General Usage", fill = 'Pitch Name') + 
-                                        geom_text(
-                                            aes(label = paste0(pitch_usage, " %")),
-                                            position = position_stack(vjust = 0.5)
-                                        )
-
+                                         aes(x = "", y = pitch_usage, fill = pitch_name)) +
+      geom_col(width = 1, color = "black") +
+      scale_fill_manual(values = palette$border) +   # FIXED
+      coord_polar(theta = "y") +
+      theme_void() +
+      labs(title = "Pitch General Usage", fill = 'Pitch Name') + 
+      geom_text(
+        aes(label = paste0(pitch_usage, " %")),
+        position = position_stack(vjust = 0.5)
+      )
+    
     pitcher_usage_vs_rhb_plot <- ggplot(pitcher_pitch_usage_df[[2]], 
                                         aes(x = "", y = pitch_usage, fill = pitch_name)) +
-                                        geom_col(width = 1, color = "black") +
-                                        coord_polar(theta = "y") +
-                                        theme_void() +
-                                        labs(title = "Pitch Usage vs RHB", fill = 'Pitch Name') + 
-                                        geom_text(
-                                            aes(label = paste0(pitch_usage, " %")),
-                                            position = position_stack(vjust = 0.5)
-                                        )
-
+      geom_col(width = 1, color = "black") +
+      scale_fill_manual(values = palette$border) +   # FIXED
+      coord_polar(theta = "y") +
+      theme_void() +
+      labs(title = "Pitch Usage vs RHB", fill = 'Pitch Name') + 
+      geom_text(
+        aes(label = paste0(pitch_usage, " %")),
+        position = position_stack(vjust = 0.5)
+      )
+    
     pitcher_usage_vs_lhb_plot <- ggplot(pitcher_pitch_usage_df[[3]], 
                                         aes(x = "", y = pitch_usage, fill = pitch_name)) +
-                                        geom_col(width = 1, color = "black") +
-                                        coord_polar(theta = "y") +
-                                        theme_void() +
-                                        labs(title = "Pitch Usage vs LHB", fill = 'Pitch Name') + 
-                                        geom_text(
-                                            aes(label = paste0(pitch_usage, " %")),
-                                            position = position_stack(vjust = 0.5)
-                                        )
+      geom_col(width = 1, color = "black") +
+      scale_fill_manual(values = palette$border) +   # FIXED
+      coord_polar(theta = "y") +
+      theme_void() +
+      labs(title = "Pitch Usage vs LHB", fill = 'Pitch Name') + 
+      geom_text(
+        aes(label = paste0(pitch_usage, " %")),
+        position = position_stack(vjust = 0.5)
+      )
+    
+
 
     return(list(pitcher_general_usage_plot,
                 pitcher_usage_vs_rhb_plot,
@@ -256,9 +277,11 @@ create_pitcher_usage_plots <- function(pitcher_pitch_usage_df) {
     }
 
 create_pitcher_pitch_characteristics_plots <- function(pitcher_pitch_characteristics_df) {
-    
+    palette <- get_pitch_palette(pitcher_pitch_characteristics_df$pitch_name)
+
     pitch_velo_spin_plot <- ggplot(pitcher_pitch_characteristics_df,
                                 aes(x = avg_velo, y = avg_spin, color = pitch_name)) +
+                                scale_color_manual(values = palette$border) +
                                 geom_point(size = 10, shape = 21, fill = "white", stroke = 1.2) +
                                 geom_text(aes(label = pitch_type),
                                     size = 4,
@@ -287,6 +310,7 @@ create_pitcher_pitch_characteristics_plots <- function(pitcher_pitch_characteris
                                     xend = avg_plate_x,
                                     yend = avg_plate_z),
                                     linewidth = 1, linetype = 'dashed') +
+                                scale_color_manual(values = palette$border) +
                                 geom_point(aes(x = avg_rel_x, y = avg_rel_z), size = 4, shape = 21, fill = "white") +
                                 geom_point(aes(x = avg_plate_x, y = avg_plate_z), size = 4) +
                                 coord_fixed(xlim = c(-3.5, 3.5), ylim = c(-1, 8)) +
@@ -314,6 +338,10 @@ create_pitcher_pitch_characteristics_plots <- function(pitcher_pitch_characteris
 }
 
 pitcher_radar_acceleration_plot <- function(pitcher_pitch_characteristics_df) {
+    palette <- get_pitch_palette(pitcher_acceleration_radar_df$pitch_name)
+    
+    colors_border <- palette$border
+    colors_fill   <- palette$fill
 
   # Build the data
   pitcher_acceleration_radar_df <- pitcher_pitch_characteristics_df %>%
@@ -330,9 +358,9 @@ pitcher_radar_acceleration_plot <- function(pitcher_pitch_characteristics_df) {
   radar_base <- pitcher_acceleration_radar_df %>%
     select(avg_ax, avg_ay, avg_az) %>%
     rename(
-      Horizontal_Acceleration = avg_ax,
-      Forward_Acceleration    = avg_ay,
-      Vertical_Acceleration   = avg_az
+      Horizontal= avg_ax,
+      Forward  = avg_ay,
+      Vertical  = avg_az
     ) %>%
     as.data.frame()
 
@@ -344,9 +372,6 @@ pitcher_radar_acceleration_plot <- function(pitcher_pitch_characteristics_df) {
   radar_ready <- rbind(max_row, min_row, radar_base)
   rownames(radar_ready) <- c("MAX", "MIN", pitcher_acceleration_radar_df$pitch_type)
 
-  # Colors
-  colors <- c("red", "blue", "green", "purple")
-  fills  <- scales::alpha(colors, .4)
 
   # Wrap the plot in a function so it behaves like a ggplot object
   radar_plot <- function() {
@@ -355,8 +380,8 @@ pitcher_radar_acceleration_plot <- function(pitcher_pitch_characteristics_df) {
     radarchart(
       radar_ready,
       axistype = 1,
-      pcol = colors,
-      pfcol = fills,
+      pcol = colors_border,
+      pfcol = colors_fill,
       plwd = 3,
       cglcol = "grey",
       cglty = 1,
@@ -365,11 +390,11 @@ pitcher_radar_acceleration_plot <- function(pitcher_pitch_characteristics_df) {
       cglwd = 0.8,
       vlcex = .7
     )
-
+    title("Pitch Acceleration Profile")
     legend(
       "topright",
       legend = pitcher_acceleration_radar_df$pitch_type,
-      col = colors,
+      col = colors_border,
       lwd = 2,
       bty = "n"
     )
@@ -382,26 +407,38 @@ pitcher_radar_acceleration_plot <- function(pitcher_pitch_characteristics_df) {
     
 create_pitcher_pitch_visual_plots <- function(pitcher_statcast_df) {
     ### WHERE PITCHES THROWN
-
+    
     pitch_general_location <- ggplot(pitcher_statcast_df, aes(plate_x, plate_z)) +
-      stat_density_2d_filled(bins = 20, show.legend = FALSE) +
-      facet_grid(stand ~ pitch_name) +
-      annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
+        stat_density_2d_filled(bins = 20, show.legend = FALSE) +
+        scale_x_continuous(breaks = NULL) +
+        scale_y_continuous(breaks = NULL) +
+        labs(title='Pitch Locations',
+            x = "Horizontal Plate Position (ft)",
+            y = "Vertical Plate Position (ft)") +
+        facet_grid(stand ~ pitch_name) +
+        annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
                fill=NA, color="white", linewidth=1) +
-      coord_fixed() +
-      theme_minimal()
+        coord_fixed() +
+        theme_minimal() +
+        theme(panel.grid = element_blank())
 
     # WHERE PITCHES ARE CONTACTED!
 
     contact_df <- pitcher_statcast_df %>% filter(description == 'hit_into_play')
     
     pitch_contact_location <- ggplot(contact_df, aes(plate_x, plate_z)) +
-      stat_density_2d_filled(bins = 20, show.legend = FALSE) +
-      facet_grid(stand ~ pitch_name) +
-      annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
+        stat_density_2d_filled(bins = 20, show.legend = FALSE) +
+        scale_x_continuous(breaks = NULL) +
+        scale_y_continuous(breaks = NULL) +
+        labs(title='Contact Locations',
+             x = "Horizontal Plate Position (ft)",
+             y = "Vertical Plate Position (ft)") +
+        facet_grid(stand ~ pitch_name) +
+        annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
                fill=NA, color="white", linewidth=1) +
-      coord_fixed() +
-      theme_minimal()
+        coord_fixed() +
+        theme_minimal() +
+        theme(panel.grid = element_blank())
 
     
     # WHERE PITCHES ARE MISSED THE MOST
@@ -409,12 +446,18 @@ create_pitcher_pitch_visual_plots <- function(pitcher_statcast_df) {
     whiff_df <- pitcher_statcast_df %>% filter(description %in% c('swinging_strike', 'swinging_strike_blocked'))
 
     pitch_whiff_location <- ggplot(contact_df, aes(plate_x, plate_z)) +
-      stat_density_2d_filled(bins = 20, show.legend = FALSE) +
-      facet_grid(stand ~ pitch_name) +
-      annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
+        stat_density_2d_filled(bins = 20, show.legend = FALSE) +
+        scale_x_continuous(breaks = NULL) +
+        scale_y_continuous(breaks = NULL) +
+        labs(title='Whiff Locations',
+             x = "Horizontal Plate Position (ft)",
+             y = "Vertical Plate Position (ft)") +
+        facet_grid(stand ~ pitch_name) +
+        annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
                fill=NA, color="white", linewidth=1) +
-      coord_fixed() +
-      theme_minimal()
+        coord_fixed() +
+        theme_minimal() +
+        theme(panel.grid = element_blank())
 
     # WEAK CONTACT, VS HARD CONTACT
 
@@ -426,24 +469,30 @@ create_pitcher_pitch_visual_plots <- function(pitcher_statcast_df) {
     hard_df <- hit_hard_df %>% filter(hard_hit)
     
     pitch_hard_vs_weak_location <- ggplot() +
-      stat_density_2d(
+        stat_density_2d(
         data = weak_df,
         aes(plate_x, plate_z, color = "weak"),
         bins = 10,
         alpha = 0.8
-      ) +
-      stat_density_2d(
+        ) +
+        stat_density_2d(
         data = hard_df,
         aes(plate_x, plate_z, color = "hard"),
         bins = 10,
         alpha = 0.8
-      ) +
-      scale_color_manual(values = c("weak" = "cyan", "hard" = "red")) +
-      facet_grid(stand ~ pitch_name) +
-      annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
+        ) +
+        scale_x_continuous(breaks = NULL) +
+        scale_y_continuous(breaks = NULL) +
+        labs(title='Hard vs Weak Contact Areas',
+             x = "Horizontal Plate Position (ft)",
+             y = "Vertical Plate Position (ft)") +
+        scale_color_manual(values = c("weak" = "cyan", "hard" = "red")) +
+        facet_grid(stand ~ pitch_name) +
+        annotate("rect", xmin=-0.85, xmax=0.85, ymin=1.5, ymax=3.5,
                fill=NA, color="black", linewidth=1, linetype = 'dashed') +
-      coord_fixed(xlim = c(-2, 2), ylim = c(0, 4)) +
-      theme_minimal()
+        coord_fixed(xlim = c(-2, 2), ylim = c(0, 4)) +
+        theme_minimal() +
+        theme(panel.grid = element_blank())
 
 
 
@@ -461,13 +510,13 @@ create_pitch_tendency_plots <- function(pitcher_scouting_report_df) {
         ########## PITCH COUNT HEAT MAP ####################
     heatmap_df <- pitcher_scouting_report_df %>%
     mutate(count = paste0(balls, "-", strikes)) %>%
-    group_by(stance, count, pitch_type) %>%
+    group_by(stance, count, pitch_name) %>%
     summarise(prob = mean(probability), .groups = "drop") %>%
     mutate(count = factor(count, levels = c("0-0","1-0","2-0","3-0",
                                             "0-1","1-1","2-1","3-1",
                                             "0-2","1-2","2-2","3-2")))
 
-    pitch_count_heatmap_plot <- ggplot(heatmap_df, aes(x = pitch_type, y = count, fill = prob)) +
+    pitch_count_heatmap_plot <- ggplot(heatmap_df, aes(x = pitch_name, y = count, fill = prob)) +
         geom_tile(color = "white") +
         scale_fill_viridis_c(option = "H") +
         facet_wrap(~ stance) +
@@ -486,7 +535,7 @@ create_pitch_tendency_plots <- function(pitcher_scouting_report_df) {
     #################### PITCH TIME THRU ORDER #######################
     heatmap_tto <- pitcher_scouting_report_df %>%
     mutate(count = paste0(balls, "-", strikes)) %>%
-    group_by(tto, count, pitch_type) %>%
+    group_by(tto, count, pitch_name) %>%
     summarise(prob = mean(probability), .groups = "drop") %>%
     mutate(
         count = factor(count, levels = c(
@@ -496,7 +545,7 @@ create_pitch_tendency_plots <- function(pitcher_scouting_report_df) {
         ))
     )
 
-    pitch_tto_heatmap_plot <- ggplot(heatmap_tto, aes(x = pitch_type, y = count, fill = prob)) +
+    pitch_tto_heatmap_plot <- ggplot(heatmap_tto, aes(x = pitch_name, y = count, fill = prob)) +
         geom_tile(color = "white") +
         scale_fill_viridis_c(option = "C") +
         facet_wrap(~ tto) +
