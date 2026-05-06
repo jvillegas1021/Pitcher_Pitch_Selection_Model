@@ -320,7 +320,7 @@ create_pitcher_pitch_characteristics_plots <- function(pitcher_pitch_characteris
                                        fill = NA, color = "black",
                                        linetype = "dashed", linewidth = 1) +
                                 labs(
-                                  title = 'Pitch Avg Release to Avg Finish',
+                                  title = 'Pitch Avg Release to Avg Finish (Catcher View)',
                                 x = "Horizontal Position (ft)",
                                 y = "Vertical Position (ft)",
                                 color = 'Pitch Name'
@@ -414,7 +414,7 @@ create_pitcher_pitch_visual_plots <- function(pitcher_statcast_df) {
         stat_density_2d_filled(bins = 20, show.legend = FALSE) +
         scale_x_continuous(breaks = NULL) +
         scale_y_continuous(breaks = NULL) +
-        labs(title='Pitch Locations',
+        labs(title='Pitch Locations (Catcher View)',
             x = "Horizontal Plate Position (ft)",
             y = "Vertical Plate Position (ft)") +
         facet_grid(batter_hand ~ pitch_name) +
@@ -432,7 +432,7 @@ create_pitcher_pitch_visual_plots <- function(pitcher_statcast_df) {
         stat_density_2d_filled(bins = 20, show.legend = FALSE)  +
         scale_x_continuous(breaks = NULL) +
         scale_y_continuous(breaks = NULL) +
-        labs(title='Hard Hit Locations',
+        labs(title='Hard Hit Locations (Catcher View)',
              x = "Horizontal Plate Position (ft)",
              y = "Vertical Plate Position (ft)") +
         facet_grid(batter_hand ~ pitch_name) +
@@ -451,7 +451,7 @@ create_pitcher_pitch_visual_plots <- function(pitcher_statcast_df) {
         stat_density_2d_filled(bins = 20, show.legend = FALSE) +
         scale_x_continuous(breaks = NULL) +
         scale_y_continuous(breaks = NULL) +
-        labs(title='Whiff Locations',
+        labs(title='Whiff Locations (Catcher View)',
              x = "Horizontal Plate Position (ft)",
              y = "Vertical Plate Position (ft)") +
         facet_grid(batter_hand ~ pitch_name) +
@@ -550,7 +550,7 @@ create_pitch_tendency_plots <- function(pitcher_scouting_report_df) {
             title = "Most Likely Pitch by Count",
             x = "Strikes",
             y = "Balls",
-            fill = 'Pitch Name'
+            fill = 'Pitch Type'
         ) +
         theme_minimal(base_size = 14) +
         theme(
@@ -562,4 +562,26 @@ create_pitch_tendency_plots <- function(pitcher_scouting_report_df) {
                 pitch_tto_heatmap_plot,
                 pitch_count_grid)
            )
-}      
+}   
+
+###########################INSIGHTS############################################################
+lhb_insights <- function(lhb_pitcher_scounting_report_df)  {
+    return
+    }
+
+get_count_leverage_insights <- function(pitcher_scouting_report_df) {
+    #  exclude 3-0 and first pitch count, NO RUNNERS ON, first time thru
+    likely_pitches_count_leverage <- pitcher_scouting_report_df %>%
+    filter(count != '3-0',
+           count != '0-0',
+           runners_on == FALSE,
+           tto == 1) %>%
+    group_by(count_leverage, pitch_name) %>%
+    summarise(most_likely_pitch = round(mean(probability), 2),
+             .groups='drop') %>%
+    group_by(count_leverage) %>%
+    slice_max(most_likely_pitch, n=1)
+
+    return(likely_pitches_count_leverage)
+
+    }
