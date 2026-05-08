@@ -116,8 +116,60 @@ create_pitcher_pitch_characteristics_plots <- function(pitcher_pitch_characteris
                                   panel.border = element_rect(color = "black", fill = NA))
 
 
+
+    ########## HORIZONTAL MOVEMENT PLOT#################
+    horizontal_movement_df <- pitcher_pitch_characteristics_df %>%
+      select(pitch_name, avg_rel_x, avg_plate_x) %>%
+      pivot_longer(
+        cols = c(avg_rel_x, avg_plate_x),
+        names_to = "point_type",
+        values_to = "x"
+      ) %>%
+      mutate(
+        point_type = ifelse(point_type == "avg_rel_x", "release", "plate")
+      )
+    
+    pitch_horizontal_movement_plot <- ggplot(horizontal_movement_df, aes(x = x, y = pitch_name, color = pitch_name, group = pitch_name)) +
+      geom_line(size = 1.2) +
+      geom_point(size = 3) +
+      scale_color_manual(values = palette$border) +
+      labs(
+        title = "Horizontal Movement (Release → Plate)",
+        x = "Horizontal Location (ft)",
+        y = "Pitch Type",
+        color = 'Pitch Name'
+      ) +
+      theme_bw()
+
+    ########## Vertical MOVEMENT PLOT#################
+    vertical_movement_df <- pitcher_pitch_characteristics_df %>%
+      select(pitch_name, avg_rel_z, avg_plate_z) %>%
+      pivot_longer(
+        cols = c(avg_rel_z, avg_plate_z),
+        names_to = "point_type",
+        values_to = "z"
+      ) %>%
+      mutate(
+        point_type = if_else(point_type == "avg_rel_z", "release", "plate")
+      )
+
+    pitch_vertical_movement_plot <- ggplot(vertical_movement_df, aes(x=pitch_name, y=z, color = pitch_name, group = pitch_name)) +
+        geom_point(size = 3) +
+        geom_line(size = 1.2) +
+        scale_color_manual(values = palette$border) +
+        labs(
+            title = "Vertical Movement (Release → Plate)",
+            x = "Pitch Type",
+            y = "Vertical Location (ft)",
+            color = 'Pitch Name'
+          ) +
+          theme_bw()
+
+    
     return(list(pitch_velo_spin_plot,
-                pitch_release_to_finish_plot))
+                pitch_release_to_finish_plot,
+               pitch_horizontal_movement_plot,
+               pitch_vertical_movement_plot))
 
 }
 
