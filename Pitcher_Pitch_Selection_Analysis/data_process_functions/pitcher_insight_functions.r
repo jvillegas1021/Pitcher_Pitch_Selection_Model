@@ -1,28 +1,18 @@
 ###########################INSIGHTS############################################################
-lhb_insights <- function(pitcher_scounting_report_df)  {
+lhb_and_rhb_insights <- function(pitcher_scounting_report_df)  {
+    
     lhb_pitcher_scouting_report <- pitcher_scounting_report_df %>%
     filter(stance == 'L')
 
+    rhb_pitcher_scouting_report <- pitcher_scounting_report_df %>%
+    filter(stance == 'R')
+
     lhb_count_leverage_insights <- get_count_leverage_insights(lhb_pitcher_scouting_report)
-    
-    
     lhb_count_leverage_runners_on_insights <- get_count_leverage_runners_on_insights(lhb_pitcher_scouting_report)
     lhb_count_leverage_runners_scoring_position_insights <- get_count_leverage_runners_scoring_position_insights(lhb_pitcher_scouting_report)
     lhb_double_up_insights <- get_double_up_insights(lhb_pitcher_scouting_report)
     lhb_follow_up_insights <- get_follow_up_insights(lhb_pitcher_scouting_report)
     lhb_first_pitch_insights <- get_first_pitch_insights(lhb_pitcher_scouting_report)
-    
-    return(list(count_leverage = lhb_count_leverage_insights,
-                runners_on = lhb_count_leverage_runners_on_insights,
-                scoring_position = lhb_count_leverage_runners_scoring_position_insights,
-                double_up = lhb_double_up_insights,
-                follow_up = lhb_follow_up_insights,
-                first_pitch = lhb_first_pitch_insights))
-    }
-
-rhb_insights <- function(pitcher_scounting_report_df)  {
-    rhb_pitcher_scouting_report <- pitcher_scounting_report_df %>%
-    filter(stance == 'R')
 
     rhb_count_leverage_insights <- get_count_leverage_insights(rhb_pitcher_scouting_report)
     rhb_count_leverage_runners_on_insights <- get_count_leverage_runners_on_insights(rhb_pitcher_scouting_report)
@@ -31,13 +21,21 @@ rhb_insights <- function(pitcher_scounting_report_df)  {
     rhb_follow_up_insights <- get_follow_up_insights(rhb_pitcher_scouting_report)
     rhb_first_pitch_insights <- get_first_pitch_insights(rhb_pitcher_scouting_report)
     
-    return(list(count_leverage = rhb_count_leverage_insights,
-                runners_on = rhb_count_leverage_runners_on_insights,
-                scoring_position = rhb_count_leverage_runners_scoring_position_insights,
-                double_up = rhb_double_up_insights,
-                follow_up = rhb_follow_up_insights,
-                first_pitch = rhb_first_pitch_insights))
+    return(list(lhb_count_leverage = lhb_count_leverage_insights,
+                lhb_runners_on = lhb_count_leverage_runners_on_insights,
+                lhb_scoring_position = lhb_count_leverage_runners_scoring_position_insights,
+                lhb_double_up = lhb_double_up_insights,
+                lhb_follow_up = lhb_follow_up_insights,
+                lhb_first_pitch = lhb_first_pitch_insights,
+                rhb_count_leverage = rhb_count_leverage_insights,
+                rhb_runners_on = rhb_count_leverage_runners_on_insights,
+                rhb_scoring_position = rhb_count_leverage_runners_scoring_position_insights,
+                rhb_double_up = rhb_double_up_insights,
+                rhb_follow_up = rhb_follow_up_insights,
+                rhb_first_pitch = rhb_first_pitch_insights
+               ))
     }
+
     
 
 get_count_leverage_insights <- function(pitcher_scouting_report_df) {
@@ -80,7 +78,7 @@ get_double_up_insights <- function(pitcher_scouting_report_df) {
     filter(prev_pitch_name == pitch_name) %>%
     group_by(pitch_name) %>%
     summarise(
-      probability = mean(probability),
+      probability = round(mean(probability), 2),
       .groups = "drop"
     ) %>%
     slice_max(probability, n = 1)
@@ -92,7 +90,7 @@ get_follow_up_insights <- function(pitcher_scouting_report_df) {
     filter(!is.na(prev_pitch_type)) %>%
     group_by(prev_pitch_name, pitch_name) %>%
     summarise(
-      probability = mean(probability),
+      probability = round(mean(probability), 2),
       .groups = "drop"
     ) %>%
     group_by(prev_pitch_name) %>%
