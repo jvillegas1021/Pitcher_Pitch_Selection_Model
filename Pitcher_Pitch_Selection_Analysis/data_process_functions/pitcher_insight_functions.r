@@ -1,5 +1,5 @@
 ###########################INSIGHTS############################################################
-lhb_and_rhb_insights <- function(pitcher_scounting_report_df)  {
+create_lhb_and_rhb_insights <- function(pitcher_scounting_report_df)  {
     
     lhb_pitcher_scouting_report <- pitcher_scounting_report_df %>%
     filter(stance == 'L')
