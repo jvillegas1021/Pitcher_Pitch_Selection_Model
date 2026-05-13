@@ -11,13 +11,8 @@ library(stringr)
 library(ggplot2)
 library(readr)
 
-source("Pitcher_Pitch_Selection_Static_Data.r")
-source("Pitch_Selection_Multipliers.r")
-source("Pitcher_First_Pitch_Prediction.r")
-source("Pitch_Prediction.r")
-source("Scouting_Report.r")
-source("Full_Pitcher_Pitch_Scouting_Report.r")
-source("sql_functions.r")
+source("full_pitcher_pitch_scouting_report_functions.r")
+source("data_extract_functions.r")
 
 
 
