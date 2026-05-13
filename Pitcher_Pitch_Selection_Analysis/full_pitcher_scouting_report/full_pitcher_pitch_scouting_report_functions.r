@@ -1,16 +1,3 @@
-library(DBI)
-library(RPostgres)
-library(tidyverse)
-library(glue)
-library(httr)
-library(jsonlite)
-library(dplyr)
-library(tidyr)
-library(lubridate)
-library(stringr)
-library(ggplot2)
-library(readr)
-
 
 run_pitcher_scouting_report <- function(pitcher_id, statcast_df) {
     
@@ -29,7 +16,7 @@ run_pitcher_scouting_report <- function(pitcher_id, statcast_df) {
         mutate(total_usage_perc = total_pitch_count / sum(total_pitch_count))
     
     valid_pitches <- pitch_totals %>%
-        filter(total_usage_perc >= 0.10) %>%
+        filter(total_usage_perc >= 0.025) %>%
         pull(pitch_type)
     
     pitcher_data <- pitcher_data %>%
