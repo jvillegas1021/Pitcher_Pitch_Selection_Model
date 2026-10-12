@@ -6,7 +6,7 @@ An automated data engineering and analytics pipeline built in R that connects to
 
 ---
 
-## 📈 Featured Example: Automated Scouting Report (Pitcher ID: 808967)
+## 📈 Featured Example: Automated Scouting Report Yoshinobu Yamamoto (Pitcher ID: 808967)
 
 To demonstrate the pipeline's capabilities without requiring a live database connection, the results for an example pitcher have been compiled below.
 
