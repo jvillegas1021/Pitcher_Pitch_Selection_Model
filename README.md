@@ -42,13 +42,14 @@ The core philosophy of this project is clean, modular, and reusable code.
 ```text
 ├── data_extract_functions/
 │   ├── extract_data_from_database.r  # Parameterized SQL connection & safe data ingestion
-│   └── process_scouting_metrics.r    # Core algorithmic splits (LHB/RHB, counts, TTO)
+│  
+└── run_pitcher_analysis_script.r                   # Wrapper script to execute full pipeline
+|
 ├── output/
 │   └── pitcher_808967/               # Automated pipeline artifact exports
-│       ├── pitch_usage_table.csv     # Granular summary data
+│       ├── pitch_charcteristics_table.csv     # Granular summary data
 │       ├── pitch_visuals.png
 │       └── ...
-└── run_analysis.R                    # Wrapper script to execute full pipeline
 ```
 
 ### Key Technical Implementations
