@@ -63,4 +63,6 @@ The core philosophy of this project is clean, modular, and reusable code.
 For deep-dive reviews, the raw tabular outputs generated directly by this pipeline can be accessed here:
 * [Download Pitch Characteristics & Spin/Velo Metrics (CSV)](example/pitch_characteristics_table.csv)
 * [Download Pitch Performace (CSV)](example/pitch_performance_table.csv)
+* [Download Split Finger vs League (CSV)](example/split_finger_Yoshinobu_Yamamoto.csv)
+
 
