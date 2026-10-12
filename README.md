@@ -17,11 +17,12 @@ The pipeline isolates pitches with \(\ge\) 10% usage and segments them by **Left
 
 ![Pitch Usage Distribution](example/pitch_usage_combined.png)
 
+![Pitch Tendencies Profile](example/pitch_tendencies_combined.png)
+
 ### 2. Normalized Movement Profiles
 To isolate pure aerodynamic break from varying physical release points, the pipeline normalizes the release coordinates to a baseline of `(0,0)`. This allows direct, side-by-side scale comparison of vertical drop and horizontal movement.
 
 ![Horizontal Movement (Normalized)](example/pitch_characteristics_combined.png)
-![Vertical Drop Profile](example/pitch_tendencies_combined.png.png)
 
 ### 3. Spatial Run-Value & Damage Heatmaps
 Using 2D kernel density estimations, the pipeline visualizes pitch locations at the plate to identify execution strengths and vulnerabilities:
