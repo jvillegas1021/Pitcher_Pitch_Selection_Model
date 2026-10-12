@@ -15,20 +15,20 @@ The pipeline isolates pitches with \(\ge\) 10% usage and segments them by **Left
 * **Count-by-Count Tendencies** (e.g., ahead, behind, 2-strikes)
 * **Times Through the Order (TTO)** effects on velocity and spin maintenance
 
-![Pitch Usage Distribution](output/pitcher_808967/pitch_usage.png)
+![Pitch Usage Distribution](example/pitch_usage_combined.png)
 
 ### 2. Normalized Movement Profiles
 To isolate pure aerodynamic break from varying physical release points, the pipeline normalizes the release coordinates to a baseline of `(0,0)`. This allows direct, side-by-side scale comparison of vertical drop and horizontal movement.
 
-![Horizontal Movement (Normalized)](output/pitcher_808967/pitch_visuals.png)
-![Vertical Drop Profile](output/pitcher_808967/tendencies.png)
+![Horizontal Movement (Normalized)](example/pitch_characteristics_combined.png)
+![Vertical Drop Profile](example/pitch_tendencies_combined.png.png)
 
 ### 3. Spatial Run-Value & Damage Heatmaps
 Using 2D kernel density estimations, the pipeline visualizes pitch locations at the plate to identify execution strengths and vulnerabilities:
 * **Whiff Heatmaps:** High-density zones where the pitcher generates maximum swing-and-miss.
 * **Hard-Hit Heatmaps:** Spatial locations resulting in \(\ge\) 95 mph exit velocity to diagnose mistake pitches.
 
-![Spatial Performance Heatmaps](output/pitcher_808967/characteristics.png)
+![Spatial Performance Heatmaps](example/pitch_visuals_combined.png)
 
 ---
 
