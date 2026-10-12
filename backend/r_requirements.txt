@@ -1,0 +1,14 @@
+tidyverse
+DBI
+RPostgres
+httr
+jsonlite
+glmnet
+recipes
+caret
+mlbplotR
+ggplot2
+readr
+fmsb
+scales
+patchwork
