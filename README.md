@@ -49,7 +49,6 @@ The core philosophy of this project is clean, modular, and reusable code.
 ```
 
 ### Key Technical Implementations
-* **Secure Database Ingestion:** Built using `RPostgres` utilizing parameterized queries (`$1` variables) to strictly prevent SQL injection and guarantee query performance over large datasets.
 * **Tidy Data Manipulation:** Leverages `tidyverse` (`dplyr`, `tidyr`) to efficiently reshape tracking variables into structured analytical data frames.
 * **Exportable Data Artifacts:** Automatically structures and outputs standalone high-definition `.png` visualization assets alongside underlying `.csv` performance datasets for cross-departmental sharing.
 
