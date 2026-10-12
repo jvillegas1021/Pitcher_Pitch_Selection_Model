@@ -15,7 +15,7 @@ To demonstrate the pipeline's capabilities without requiring a live database con
 ### 1. Pitch Usage & Tactical Tendencies
 The pipeline isolates pitches with \(\ge\) 10% usage and segments them by **Left-Handed Batters (LHB) vs. Right-Handed Batters (RHB) splits**. It tracks how arsenal deployment changes dynamically based on:
 * **Count-by-Count Tendencies** (e.g., ahead, behind, 2-strikes)
-* **Times Through the Order (TTO)** effects on velocity and spin maintenance
+* **Times Through the Order (TTO)** 
 
 ![Pitch Usage Distribution](example/pitch_usage_combined.png)
 
