@@ -1,0 +1,16 @@
+library(jsonlite)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(stringr)
+library(ggplot2)
+library(readr)
+library(fmsb)
+
+source("backend/data_extract_functions/extract_data_from_database.r")
+source("backend/data_transform_functions/pitcher_plot_functions.r")
+source("backend/data_transform_functions/pitcher_insight_functions.r")
+source("backend/data_transform_functions/pitcher_data_functions.r")
+source("backend/data_pipelines/pitcher_analysis_pipeline.r")
+
+run_pitcher_analysis(pitcher_id)
