@@ -5,7 +5,7 @@ source("data_process_functions.R")
 
 
 # pull evaluate data
-pitch_level_data <- read.csv("C:/Users/james.villegas/OneDrive - Rotork plc/Desktop/Baseball/AnalyticsQuestionnairePitchData.csv")
+pitch_level_data <- read.csv()
 
 cleaned_pitch_data <- clean_pitch_level_data(pitch_level_data)
 
