@@ -116,6 +116,20 @@ summarise_pitch_level_data <- function(pitch_level_data) {
       
       f_strike_perc        = round(sum(is_first_pitch & (is_called_strike | PitchCall %in% swing_events), na.rm = TRUE) / sum(is_first_pitch, na.rm = TRUE) * 100, 2),
       
+      avg_release_speed = mean(ReleaseSpeed, na.rm = TRUE),
+      avg_zone_speed = mean(TrajectoryZoneSpeed, na.rm = TRUE),
+      avg_zone_time = mean(TrajectoryZoneTime, na.rm = TRUE),
+      avg_location_x = mean(TrajectoryLocationX, na.rm = TRUE),
+      avg_location_y = mean(TrajectoryLocationY, na.rm = TRUE),
+      avg_location_z = mean(TrajectoryLocationZ, na.rm = TRUE),
+      avg_spin_rate = mean(ReleaseSpinRate, na.rm = TRUE),
+      avg_release_x = mean(ReleasePositionX, na.rm = TRUE),
+      avg_release_y = mean(ReleasePositionY, na.rm = TRUE),
+      avg_release_z = mean(ReleasePositionZ, na.rm = TRUE),
+      
+      avg_vertical_break = mean(TrajectoryVerticalBreakInduced, na.rm = TRUE),
+      avg_horizontal_break = mean(TrajectoryPfxHorz, na.rm = TRUE),
+      
       .groups = 'drop'
     )
   
