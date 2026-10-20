@@ -22,7 +22,7 @@ clean_pitch_level_data <- function(pitch_level_data) {
   return (cleaned_pitch_data)
 }
 
-summarise_pitch_level_data <- function(pitch_level_data, group_by = "PitcherId") {
+summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "PitcherId") {
   # set event lists for count flags
   swing_events <- c('field_out', 'single', 'foul', 'foul_bunt', 'foul_tip',
                     'home_run', 'field_error', 'sac_bunt', 'swinging_strike',
@@ -64,10 +64,10 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by = "PitcherId")
         TRUE ~ NA_character_
       ))
   
-  # summarize by pitcher
+  # summarize by pitcher or batter
   
-  summarized_pitcher_level_data <- processed_pitch_level_data %>%
-    group_by(.data[[group_by]]) %>%
+  summarized_player_level_data <- processed_pitch_level_data %>%
+    group_by(.data[[group_by_var]]) %>%
     summarise(
       pitches              = n(),
       zone_perc            = round(mean(is_in_zone, na.rm = TRUE) * 100, 2),
@@ -104,14 +104,16 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by = "PitcherId")
       even_perc = round(
         sum(count_leverage == "Even", na.rm = TRUE) / n() * 100, 2
       ),
+      
+      avg_pitches_per_ab = round((pitches / batters_faced), 0),
       .groups = 'drop'
     )
   
   
-  # summarize pitcher per pitch type 
+  # summarize pitcher or batter per pitch type 
   
-  summarized_pitcher_pitchtype_level_data <- processed_pitch_level_data %>%
-    group_by(.data[[group_by]], PitchType) %>%
+  summarized_player_pitchtype_level_data <- processed_pitch_level_data %>%
+    group_by(.data[[group_by_var]], PitchType) %>%
     summarise(
       pitches              = n(),
       zone_perc            = round(mean(is_in_zone, na.rm = TRUE) * 100, 2),
@@ -130,6 +132,8 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by = "PitcherId")
       
       f_strike_perc        = round(sum(is_first_pitch & (is_called_strike | PitchCall %in% swing_events), na.rm = TRUE) / sum(is_first_pitch, na.rm = TRUE) * 100, 2),
       
+      good_take_perc       = round(sum(!is_in_zone & !is_swing, na.rm = TRUE) / sum(!is_in_zone, na.rm = TRUE) * 100, 2),
+      
       avg_release_speed = mean(ReleaseSpeed, na.rm = TRUE),
       avg_zone_speed = mean(TrajectoryZoneSpeed, na.rm = TRUE),
       avg_zone_time = mean(TrajectoryZoneTime, na.rm = TRUE),
@@ -146,13 +150,26 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by = "PitcherId")
       
       .groups = 'drop'
     ) %>%
-    group_by(.data[[group_by]]) %>%
+    group_by(.data[[group_by_var]]) %>%
     mutate(pitch_usage = round(pitches / sum(pitches) * 100, 2)) %>%
     ungroup()
   
+  if (group_by_var == 'BatterId') {
+    
+    # For split metrics, rename 'pitch_usage' to 'pitch_type_seen_perc' 
+    # and rename 'pitches' to 'pitches_seen' to follow batter logic
+    summarized_player_pitchtype_level_data <- summarized_player_pitchtype_level_data %>%
+      rename(pitches_seen = pitches, pitch_type_seen_perc = pitch_usage)
+    
+    
+    summarized_player_level_data <- summarized_player_level_data %>%
+      rename(pitches_seen = pitches, at_bats = batters_faced)
+    
+  }
+  
   return(list(
-    Pitcher_Performance = summarized_pitcher_level_data,
-    Pitcher_Pitch_Performance = summarized_pitcher_pitchtype_level_data
+    Player_Performance = summarized_player_level_data,
+    Player_Pitch_Performance = summarized_player_pitchtype_level_data
   ))
   
 }
