@@ -44,6 +44,8 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
   
   hit_events <- c('single', 'double', 'triple', 'home_run')
   
+  out_events <- c('force_out', 'field_out', 'sac_bunt', 'strikeout')
+  
   # create count flags
   processed_pitch_level_data <- pitch_level_data %>%
     mutate(
@@ -60,12 +62,14 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       is_strikeout = if_else(PitchCall == 'strikeout', TRUE, FALSE),
       is_walk = if_else(PitchCall == 'walk', TRUE, FALSE),
       is_hit = if_else(PitchCall %in% hit_events, TRUE, FALSE),
+      is_out = if_else(PitchCall %in% out_events, TRUE, FALSE),
+      is_double_out = if_else(PitchCall == 'grounded_into_double_play', TRUE, FALSE),
       count_leverage = case_when(
         Balls == Strikes ~ "Even",
         Balls > Strikes ~ "Behind",
         Balls < Strikes ~ "Ahead",
-        TRUE ~ NA_character_
-      ))
+        TRUE ~ NA_character_)
+      )
   
   # summarize by pitcher or batter
   
@@ -93,12 +97,16 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       
       batters_faced        = sum(PitchCall %in% at_bat_events, na.rm = TRUE),
       
+      outs                 = sum(is_out, na.rm = TRUE) + (sum(is_double_out, na.rm = TRUE) * 2),
+      
       singles        = sum(PitchCall == 'single', na.rm = TRUE),
       doubles        = sum(PitchCall == 'double', na.rm = TRUE),
       triples        = sum(PitchCall == 'triple', na.rm = TRUE),
       home_runs        = sum(PitchCall == 'home_run', na.rm = TRUE),
       
       total_hits           = sum(is_hit, na.rm = TRUE),
+      
+      ip            = round(outs / 3, 3),
       
       k_perc               = round(sum(is_strikeout, na.rm = TRUE) / batters_faced * 100, 2),
       bb_perc              = round(sum(is_walk, na.rm = TRUE) / batters_faced * 100, 2),
@@ -173,7 +181,8 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
     
     
     summarized_player_level_data <- summarized_player_level_data %>%
-      rename(pitches_seen = pitches, at_bats = batters_faced)
+      rename(pitches_seen = pitches, at_bats = batters_faced) %>%
+      select(-ip)
     
   }
   
