@@ -22,7 +22,7 @@ clean_pitch_level_data <- function(pitch_level_data) {
   return (cleaned_pitch_data)
 }
 
-summarise_pitch_level_data <- function(pitch_level_data) {
+summarise_pitch_level_data <- function(pitch_level_data, group_by = "PitcherId") {
   # set event lists for count flags
   swing_events <- c('field_out', 'single', 'foul', 'foul_bunt', 'foul_tip',
                     'home_run', 'field_error', 'sac_bunt', 'swinging_strike',
@@ -67,7 +67,7 @@ summarise_pitch_level_data <- function(pitch_level_data) {
   # summarize by pitcher
   
   summarized_pitcher_level_data <- processed_pitch_level_data %>%
-    group_by(PitcherId) %>%
+    group_by(.data[[group_by]]) %>%
     summarise(
       pitches              = n(),
       zone_perc            = round(mean(is_in_zone, na.rm = TRUE) * 100, 2),
@@ -111,7 +111,7 @@ summarise_pitch_level_data <- function(pitch_level_data) {
   # summarize pitcher per pitch type 
   
   summarized_pitcher_pitchtype_level_data <- processed_pitch_level_data %>%
-    group_by(PitcherId, PitchType) %>%
+    group_by(.data[[group_by]], PitchType) %>%
     summarise(
       pitches              = n(),
       zone_perc            = round(mean(is_in_zone, na.rm = TRUE) * 100, 2),
@@ -146,7 +146,7 @@ summarise_pitch_level_data <- function(pitch_level_data) {
       
       .groups = 'drop'
     ) %>%
-    group_by(PitcherId) %>%
+    group_by(.data[[group_by]]) %>%
     mutate(pitch_usage = round(pitches / sum(pitches) * 100, 2)) %>%
     ungroup()
   
