@@ -145,6 +145,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       cstr_perc            = round(sum(is_called_strike, na.rm = TRUE) / pitches * 100, 2),
       swstr_perc           = round(sum(is_swinging_strike, na.rm = TRUE) / pitches * 100, 2),
       cstr_plus_swstr_perc = round((sum(is_called_strike, na.rm = TRUE) + sum(is_swinging_strike, na.rm = TRUE)) / pitches * 100, 2),
+      whiff_perc           = round((sum(is_swinging_strike, na.rm = TRUE) / sum(is_swing, na.rm = TRUE) * 100), 2),
       
       f_strike_perc        = round(sum(is_first_pitch & (is_called_strike | PitchCall %in% swing_events), na.rm = TRUE) / sum(is_first_pitch, na.rm = TRUE) * 100, 2),
       
