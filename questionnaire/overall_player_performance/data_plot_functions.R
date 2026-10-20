@@ -248,3 +248,47 @@ pitcher_contact_rate_plot_function <- function(summarized_pitch_level_data) {
     theme_minimal()
 }
 
+all_pitchers_velo_and_spin_rate_plot_function <- function(all_pitchers_pitch_level_data) {
+  all_pitchers_pitch_level_data %>%
+    filter(!is.na(avg_spin_rate),
+           !is.na(avg_release_speed)) %>%
+    ggplot(aes(
+      x = avg_release_speed,
+      y = avg_spin_rate,
+      color = PitchType
+    )) +
+    geom_point(size = 3, alpha = 0.8) +
+    labs(
+      title = "Pitch Velocity vs. Spin Rate",
+      subtitle = "Comparing pitch characteristics across pitchers",
+      x = "Average Release Velocity (mph)",
+      y = "Average Spin Rate (rpm)",
+      color = "Pitch Type"
+    ) +
+    theme_minimal(base_size = 12)
+    
+}
+
+all_pitchers_whiff_rate_by_pitch_plot_function <- function(all_pitchers_pitch_level_data) {
+  all_pitchers_pitch_level_data %>%
+    filter(!is.na(whiff_perc)) %>%
+    ggplot(aes(
+      x = whiff_perc,
+      y = PitchType,
+      color = factor(PitcherId)
+    )) +
+    geom_point(
+      aes(size = pitches),
+      alpha = 0.8,
+      position = position_jitter(height = 0.12, width = 0)
+    ) +
+    labs(
+      title = "Whiff Rate by Pitch Type",
+      subtitle = "Comparing swing-and-miss rates across pitchers",
+      x = "Whiff Rate (%)",
+      y = "Pitch Type",
+      color = "Pitcher ID",
+      size = "Pitch Count"
+    ) +
+    theme_minimal(base_size = 12)
+}
