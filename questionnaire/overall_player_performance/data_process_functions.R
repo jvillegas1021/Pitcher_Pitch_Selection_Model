@@ -1,5 +1,3 @@
-library(tidyverse)
-
 
 clean_pitch_level_data <- function(pitch_level_data) {
   
