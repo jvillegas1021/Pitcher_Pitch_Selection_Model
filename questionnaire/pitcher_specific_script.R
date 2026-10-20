@@ -47,5 +47,4 @@ ggplot2::ggsave(filename = file.path(output_dir, "pitch_usage_combined.png"),
 ggplot2::ggsave(filename = file.path(output_dir, "pitch_characteristics_combined.png"), 
                 plot = pitcher_characteristics_combined, width = 14, height = 10, dpi = 300)
 
-pitcher_pitch_characteristics_df
-pitch_characteristics_plots
+
