@@ -56,8 +56,13 @@ summarise_pitch_level_data <- function(pitch_level_data) {
       is_swinging_strike = if_else(PitchCall %in% swinging_strike_events, TRUE, FALSE),
       is_called_strike = if_else(PitchCall == 'called_strike', TRUE, FALSE),
       is_strikeout = if_else(PitchCall == 'strikeout', TRUE, FALSE),
-      is_walk = if_else(PitchCall == 'walk', TRUE, FALSE)
-    )
+      is_walk = if_else(PitchCall == 'walk', TRUE, FALSE),
+      count_leverage = case_when(
+        Balls == Strikes ~ "Even",
+        Balls > Strikes ~ "Behind",
+        Balls < Strikes ~ "Ahead",
+        TRUE ~ NA_character_
+      ))
   
   # summarize by pitcher
   
@@ -87,9 +92,18 @@ summarise_pitch_level_data <- function(pitch_level_data) {
       
       k_perc               = round(sum(is_strikeout, na.rm = TRUE) / batters_faced * 100, 2),
       bb_perc              = round(sum(is_walk, na.rm = TRUE) / batters_faced * 100, 2),
+    
+      ahead_perc = round(
+        sum(count_leverage == "Ahead", na.rm = TRUE) / n() * 100, 2
+      ),
       
+      behind_perc = round(
+        sum(count_leverage == "Behind", na.rm = TRUE) / n() * 100, 2
+      ),
       
-      
+      even_perc = round(
+        sum(count_leverage == "Even", na.rm = TRUE) / n() * 100, 2
+      ),
       .groups = 'drop'
     )
   
@@ -131,7 +145,10 @@ summarise_pitch_level_data <- function(pitch_level_data) {
       avg_horizontal_break = mean(TrajectoryPfxHorz, na.rm = TRUE),
       
       .groups = 'drop'
-    )
+    ) %>%
+    group_by(PitcherId) %>%
+    mutate(pitch_usage = round(pitches / sum(pitches) * 100, 2)) %>%
+    ungroup()
   
   return(list(
     Pitcher_Performance = summarized_pitcher_level_data,
