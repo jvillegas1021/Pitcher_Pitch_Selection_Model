@@ -67,7 +67,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
         Balls > Strikes ~ "Behind",
         Balls < Strikes ~ "Ahead",
         TRUE ~ NA_character_)
-      )
+    )
   
   # summarize by pitcher or batter
   
@@ -108,7 +108,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       
       k_perc               = round(sum(is_strikeout, na.rm = TRUE) / batters_faced * 100, 2),
       bb_perc              = round(sum(is_walk, na.rm = TRUE) / batters_faced * 100, 2),
-    
+      
       ahead_perc = round(
         sum(count_leverage == "Ahead", na.rm = TRUE) / n() * 100, 2
       ),
@@ -192,4 +192,57 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
   
 }
 
+create_pitcher_summary_table <- function(pitcher_df) {
+  pitcher_table_df <- pitcher_df %>%
+    select(
+      PitcherId,
+      pitches,
+      batters_faced,
+      total_hits,
+      outs,
+      ip,
+      k_perc,
+      bb_perc
+    ) %>%
+    rename(
+      Pitcher_ID = PitcherId,
+      Total_Pitches = pitches,
+      Batters_Faced = batters_faced,
+      Total_Hits = total_hits,
+      Outs = outs,
+      IP = ip,
+      `K%` = k_perc,
+      `BB%` = bb_perc
+    )
+  
+  return(pitcher_table_df)
+}
 
+
+create_pitcher_pitch_summary_table <- function(pitcher_pitch_df) {
+  
+  pitcher_pitch_table_df <- pitcher_pitch_df %>%
+    select(
+      PitcherId,
+      PitchType,
+      pitches,
+      pitch_usage,
+      avg_release_speed,
+      avg_spin_rate,
+      avg_vertical_break,
+      avg_horizontal_break
+    ) %>%
+    rename(
+      Pitcher_ID = PitcherId,
+      Pitch_Type = PitchType,
+      Total_Pitches = pitches,
+      Pitch_Usage = pitch_usage,
+      Avg_Release_Speed = avg_release_speed,
+      Avg_Spin_Rate = avg_spin_rate,
+      Avg_Vert_Break = avg_vertical_break,
+      Avg_Horiz_Break = avg_horizontal_break
+    )
+  
+  return(pitcher_pitch_table_df)
+  
+}
