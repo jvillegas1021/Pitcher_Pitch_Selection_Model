@@ -35,6 +35,8 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
   strike_events <- c('called_strike', 'swinging_strike', 'foul', 'foul_tip', 'swinging_strike_blocked',
                      'foul_bunt', 'strikeout')
   
+  ball_events <- c('ball', 'walk', 'wild_pitch', 'blocked_ball')
+  
   at_bat_events <- c("strikeout", "walk", "single", "double", "triple", "home_run", 
                      "field_out", "force_out", "field_error", "grounded_into_double_play", "sac_bunt")
   
@@ -42,6 +44,9 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
   swinging_strike_events <- c('swinging_strike', 'swinging_strike_blocked')
   
   hit_events <- c('single', 'double', 'triple', 'home_run')
+  
+  in_play_events <- c('single', 'sac_bunt', 'dobule', 'grounded_into_double_play', 'field_out',
+                      'home_run', 'field_error', 'force_out', 'triple')
   
   out_events <- c('force_out', 'field_out', 'sac_bunt', 'strikeout')
   
@@ -54,6 +59,8 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
            TrajectoryLocationZ >= StrikeZoneBottom &
            TrajectoryLocationX >= -0.833 &
            TrajectoryLocationX <= 0.833) | PitchCall == 'strikeout', TRUE, FALSE),
+      is_strike = if_else(PitchCall %in% strike_events, TRUE, FALSE),
+      is_ball = if_else(PitchCall %in% ball_events, TRUE, FALSE),
       is_first_pitch = if_else(PitchNumber == 1, TRUE, FALSE),
       is_swing = if_else(PitchCall %in% swing_events, TRUE, FALSE),
       is_contact = if_else(PitchCall %in% contact_events, TRUE, FALSE),
@@ -62,6 +69,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       is_strikeout = if_else(PitchCall == 'strikeout', TRUE, FALSE),
       is_walk = if_else(PitchCall == 'walk', TRUE, FALSE),
       is_hit = if_else(PitchCall %in% hit_events, TRUE, FALSE),
+      is_in_play = if_else(PitchCall %in% in_play_events, TRUE, FALSE),
       is_out = if_else(PitchCall %in% out_events, TRUE, FALSE),
       is_wild_pitch = if_else(PitchCall == 'wild_pitch', TRUE, FALSE),
       is_double_out = if_else(PitchCall == 'grounded_into_double_play', TRUE, FALSE),
@@ -80,6 +88,10 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
     group_by(.data[[group_by_var]]) %>%
     summarise(
       pitches              = n(),
+      strikes              = sum(is_strike, na.rm = TRUE) + sum(is_in_play, na.rm = TRUE),
+      balls                = sum(is_ball, na.rm = TRUE),
+      strike_perc          = round(strikes / pitches * 100, 2),
+      ball_perc            = round(balls / pitches * 100, 2),
       zone_perc            = round(mean(is_in_zone, na.rm = TRUE) * 100, 2),
       outside_zone_perc    = round(mean(!is_in_zone, na.rm = TRUE) * 100, 2),
       swing_perc           = round(mean(is_swing, na.rm = TRUE) * 100, 2),
@@ -104,7 +116,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       
       outs                 = sum(is_out, na.rm = TRUE) + (sum(is_double_out, na.rm = TRUE) * 2),
       errors               = sum(is_error, na.rm = TRUE),
-      
+      walks                = sum(is_walk, na.rm = TRUE),
       singles        = sum(PitchCall == 'single', na.rm = TRUE),
       doubles        = sum(PitchCall == 'double', na.rm = TRUE),
       triples        = sum(PitchCall == 'triple', na.rm = TRUE),
@@ -116,7 +128,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       ip            = round(outs / 3, 3),
       
       k_perc               = round(sum(is_strikeout, na.rm = TRUE) / batters_faced * 100, 2),
-      bb_perc              = round(sum(is_walk, na.rm = TRUE) / batters_faced * 100, 2),
+      bb_perc              = round(sum(walks) / batters_faced * 100, 2),
       
       ahead_perc = round(
         sum(count_leverage == "Ahead", na.rm = TRUE) / n() * 100, 2
@@ -141,6 +153,10 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
     group_by(.data[[group_by_var]], PitchType) %>%
     summarise(
       pitches              = n(),
+      strikes              = sum(is_strike, na.rm = TRUE) + sum(is_in_play, na.rm = TRUE),
+      balls                = sum(is_ball, na.rm = TRUE),
+      strike_perc          = round(strikes / pitches * 100, 2),
+      ball_perc            = round(balls / pitches * 100, 2),
       zone_perc            = round(mean(is_in_zone, na.rm = TRUE) * 100, 2),
       outside_zone_perc    = round(mean(!is_in_zone, na.rm = TRUE) * 100, 2),
       swing_perc           = round(mean(is_swing, na.rm = TRUE) * 100, 2),
