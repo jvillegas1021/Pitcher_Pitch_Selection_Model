@@ -6,7 +6,7 @@ source("functions/data_process_functions.R")
 source("functions/data_plot_functions.R")
 
 # pull data
-pitch_level_data <- read.csv("AnalyticsQuestionnairePitchData.csv")
+pitch_level_data <- read.csv("data/AnalyticsQuestionnairePitchData.csv")
 
 # clean data
 cleaned_pitch_level_data <- clean_pitch_level_data(pitch_level_data)
