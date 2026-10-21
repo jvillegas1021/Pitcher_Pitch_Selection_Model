@@ -21,6 +21,7 @@ clean_pitch_level_data <- function(pitch_level_data) {
 }
 
 summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "PitcherId") {
+  
   # set event lists for count flags
   swing_events <- c('field_out', 'single', 'foul', 'foul_bunt', 'foul_tip',
                     'home_run', 'field_error', 'sac_bunt', 'swinging_strike',
@@ -185,6 +186,19 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
     
   }
   
+  if (group_by_var == 'PitcherId') {
+    
+    pitcher_id_hand_df <- pitch_level_data %>%
+      distinct(PitcherId, PitcherHand)
+    
+    summarized_player_level_data <- summarized_player_level_data %>%
+      left_join(pitcher_id_hand_df, by=('PitcherId'))
+    
+    summarized_player_pitchtype_level_data <- pitcher_id_hand_df %>%
+      left_join(pitcher_id_hand_df, by=('PitcherId'))
+  
+  }
+  
   return(list(
     Player_Performance = summarized_player_level_data,
     Player_Pitch_Performance = summarized_player_pitchtype_level_data
@@ -196,6 +210,7 @@ create_pitcher_summary_table <- function(pitcher_df) {
   pitcher_table_df <- pitcher_df %>%
     select(
       PitcherId,
+      PitcherHand,
       pitches,
       batters_faced,
       total_hits,
@@ -206,6 +221,7 @@ create_pitcher_summary_table <- function(pitcher_df) {
     ) %>%
     rename(
       Pitcher_ID = PitcherId,
+      Pitcher_Hand = PitcherHand,
       Total_Pitches = pitches,
       Batters_Faced = batters_faced,
       Total_Hits = total_hits,
@@ -224,6 +240,7 @@ create_pitcher_pitch_summary_table <- function(pitcher_pitch_df) {
   pitcher_pitch_table_df <- pitcher_pitch_df %>%
     select(
       PitcherId,
+      PitcherHand,
       PitchType,
       pitches,
       pitch_usage,
@@ -234,6 +251,7 @@ create_pitcher_pitch_summary_table <- function(pitcher_pitch_df) {
     ) %>%
     rename(
       Pitcher_ID = PitcherId,
+      Pitcher_Hand = PitcherHand,
       Pitch_Type = PitchType,
       Total_Pitches = pitches,
       Pitch_Usage = pitch_usage,
