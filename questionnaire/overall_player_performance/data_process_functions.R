@@ -174,15 +174,21 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
   
   if (group_by_var == 'BatterId') {
     
-    # For split metrics, rename 'pitch_usage' to 'pitch_type_seen_perc' 
-    # and rename 'pitches' to 'pitches_seen' to follow batter logic
-    summarized_player_pitchtype_level_data <- summarized_player_pitchtype_level_data %>%
-      rename(pitches_seen = pitches, pitch_type_seen_perc = pitch_usage)
-    
+    batter_id_hand_df <- pitch_level_data %>%
+      distinct(BatterId, BatterSide)
     
     summarized_player_level_data <- summarized_player_level_data %>%
       rename(pitches_seen = pitches, at_bats = batters_faced) %>%
-      select(-ip)
+      mutate(batter_ahead_perc = behind_perc,
+             batter_even_perc = even_perc,
+             batter_behind_perc = ahead_perc) %>%
+      select(-ip) %>%
+      left_join(batter_id_hand_df, by=('BatterId'))
+    
+    summarized_player_pitchtype_level_data <- summarized_player_pitchtype_level_data %>%
+      rename(pitches_seen = pitches, pitch_type_seen_perc = pitch_usage) %>%
+      left_join(batter_id_hand_df, by=('BatterId'))
+    
     
   }
   
@@ -194,7 +200,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
     summarized_player_level_data <- summarized_player_level_data %>%
       left_join(pitcher_id_hand_df, by=('PitcherId'))
     
-    summarized_player_pitchtype_level_data <- pitcher_id_hand_df %>%
+    summarized_player_pitchtype_level_data <- summarized_player_pitchtype_level_data %>%
       left_join(pitcher_id_hand_df, by=('PitcherId'))
   
   }
@@ -235,7 +241,7 @@ create_pitcher_summary_table <- function(pitcher_df) {
 }
 
 
-create_pitcher_pitch_summary_table <- function(pitcher_pitch_df) {
+create_pitcher_pitchtype_summary_table <- function(pitcher_pitch_df) {
   
   pitcher_pitch_table_df <- pitcher_pitch_df %>%
     select(
@@ -263,4 +269,33 @@ create_pitcher_pitch_summary_table <- function(pitcher_pitch_df) {
   
   return(pitcher_pitch_table_df)
   
+}
+
+
+create_batter_summary_table <- function(batter_df) {
+  batter_table_df <- batter_df %>%
+    select(
+      BatterId,
+      BatterSide,
+      pitches_seen,
+      at_bats,
+      total_hits,
+      batter_ahead_perc,
+      batter_behind_perc,,
+      k_perc,
+      bb_perc
+    ) %>%
+    rename(
+      Batter_ID = BatterId,
+      Batter_Hand = BatterSide,
+      Total_Pitches = pitches_seen,
+      At_Bats = at_bats,
+      Total_Hits = total_hits,
+      Batter_Ahead = batter_ahead_perc,
+      Batter_Behind = batter_behind_perc,
+      `K%` = k_perc,
+      `BB%` = bb_perc
+    )
+  
+  return(batter_table_df)
 }
