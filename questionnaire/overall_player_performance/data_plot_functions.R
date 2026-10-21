@@ -166,9 +166,9 @@ pitch_general_usage_plot_function <- function(summarized_pitch_level_data) {
   )
 }
 
-pitcher_fastball_velocity_plot_function <- function(summarized_pitch_leve_data) {
+pitcher_fastball_velocity_plot_function <- function(summarized_pitch_level_data) {
   
-  fastball_velocity_df <- summarized_pitch_leve_data %>%
+  fastball_velocity_df <- summarized_pitch_level_data %>%
   filter(PitchType %in% c("FF", "SI", "FC")) %>%
   group_by(PitcherId) %>%
   summarise(
@@ -188,7 +188,7 @@ pitcher_fastball_velocity_plot_function <- function(summarized_pitch_leve_data) 
   geom_line(color = "steelblue", linewidth = 1) +
   geom_point(color = "darkred", size = 3) +
   scale_x_continuous(
-    breaks = sort(unique(fastball_velocity$PitcherId))
+    breaks = sort(unique(fastball_velocity_df$PitcherId))
   ) +
   labs(
     title = 'Average Velocity for Fastball Types (FF, SI, FC) Across Pitchers',
@@ -257,7 +257,9 @@ all_pitchers_velo_and_spin_rate_plot_function <- function(all_pitchers_pitch_lev
       y = avg_spin_rate,
       color = PitchType
     )) +
-    geom_point(size = 3, alpha = 0.8) +
+    geom_point(size = 2.5, alpha = 0.7) +
+    # Group by pitcher so each gets their own small panel
+    facet_wrap(~ PitcherId) + 
     labs(
       title = "Pitch Velocity vs. Spin Rate",
       subtitle = "Comparing pitch characteristics across pitchers",
@@ -265,8 +267,11 @@ all_pitchers_velo_and_spin_rate_plot_function <- function(all_pitchers_pitch_lev
       y = "Average Spin Rate (rpm)",
       color = "Pitch Type"
     ) +
-    theme_minimal(base_size = 12)
-    
+    theme_minimal(base_size = 12) +
+    theme(
+      panel.border = element_rect(color = "gray80", fill = NA),
+      strip.text = element_text(face = "bold") # Makes pitcher IDs pop out
+    )
 }
 
 all_pitchers_whiff_rate_by_pitch_plot_function <- function(all_pitchers_pitch_level_data) {
