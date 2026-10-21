@@ -208,7 +208,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       mutate(batter_ahead_perc = behind_perc,
              batter_even_perc = even_perc,
              batter_behind_perc = ahead_perc) %>%
-      select(-ip) %>%
+      select(-ip, -stolen_bases) %>%
       left_join(batter_id_hand_df, by=('BatterId'))
     
     summarized_player_pitchtype_level_data <- summarized_player_pitchtype_level_data %>%
