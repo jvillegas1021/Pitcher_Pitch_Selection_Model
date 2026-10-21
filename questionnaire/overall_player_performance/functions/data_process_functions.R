@@ -40,8 +40,9 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
   at_bat_events <- c("strikeout", "walk", "single", "double", "triple", "home_run", 
                      "field_out", "force_out", "field_error", "grounded_into_double_play", "sac_bunt")
   
+  whiff_events <- c('swinging_strike', 'swinging_strike_blocked')
   
-  swinging_strike_events <- c('swinging_strike', 'swinging_strike_blocked')
+  swinging_strike_events <- c('swinging_strike', 'foul', 'foul_tip', 'foul_bunt', 'swinging_strike_blocked')
   
   hit_events <- c('single', 'double', 'triple', 'home_run')
   
@@ -65,6 +66,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       is_swing = if_else(PitchCall %in% swing_events, TRUE, FALSE),
       is_contact = if_else(PitchCall %in% contact_events, TRUE, FALSE),
       is_swinging_strike = if_else(PitchCall %in% swinging_strike_events, TRUE, FALSE),
+      is_whiff = if_else(PitchCall %in% whiff_events, TRUE, FALSE),
       is_called_strike = if_else(PitchCall == 'called_strike', TRUE, FALSE),
       is_strikeout = if_else(PitchCall == 'strikeout', TRUE, FALSE),
       is_walk = if_else(PitchCall == 'walk', TRUE, FALSE),
@@ -106,7 +108,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       cstr_perc            = round(sum(is_called_strike, na.rm = TRUE) / pitches * 100, 2),
       swstr_perc           = round(sum(is_swinging_strike, na.rm = TRUE) / pitches * 100, 2),
       cstr_plus_swstr_perc = round((sum(is_called_strike, na.rm = TRUE) + sum(is_swinging_strike, na.rm = TRUE)) / pitches * 100, 2),
-      whiff_perc           = round((sum(is_swinging_strike, na.rm = TRUE) / sum(is_swing, na.rm = TRUE) * 100), 2),
+      whiff_perc           = round((sum(is_whiff, na.rm = TRUE) / sum(is_swing, na.rm = TRUE) * 100), 2),
       
       f_strike_perc        = round(sum(is_first_pitch & (is_called_strike | PitchCall %in% swing_events), na.rm = TRUE) / sum(is_first_pitch, na.rm = TRUE) * 100, 2),
       wild_pitch           = sum(is_wild_pitch, na.rm = TRUE),
@@ -126,8 +128,8 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       total_hits           = sum(is_hit, na.rm = TRUE),
       
       ip            = round(outs / 3, 3),
-      
-      k_perc               = round(sum(is_strikeout, na.rm = TRUE) / batters_faced * 100, 2),
+      strike_outs   = sum(is_strikeout, na.rm = TRUE),
+      k_perc               = round(strike_outs / batters_faced * 100, 2),
       bb_perc              = round(sum(walks) / batters_faced * 100, 2),
       
       ahead_perc = round(
@@ -170,7 +172,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       cstr_perc            = round(sum(is_called_strike, na.rm = TRUE) / pitches * 100, 2),
       swstr_perc           = round(sum(is_swinging_strike, na.rm = TRUE) / pitches * 100, 2),
       cstr_plus_swstr_perc = round((sum(is_called_strike, na.rm = TRUE) + sum(is_swinging_strike, na.rm = TRUE)) / pitches * 100, 2),
-      whiff_perc           = round((sum(is_swinging_strike, na.rm = TRUE) / sum(is_swing, na.rm = TRUE) * 100), 2),
+      whiff_perc           = round((sum(is_whiff, na.rm = TRUE) / sum(is_swing, na.rm = TRUE) * 100), 2),
       
       f_strike_perc        = round(sum(is_first_pitch & (is_called_strike | PitchCall %in% swing_events), na.rm = TRUE) / sum(is_first_pitch, na.rm = TRUE) * 100, 2),
       
