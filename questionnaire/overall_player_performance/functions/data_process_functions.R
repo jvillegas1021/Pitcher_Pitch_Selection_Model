@@ -45,6 +45,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
   
   out_events <- c('force_out', 'field_out', 'sac_bunt', 'strikeout')
   
+  stolen_base_events <- c('stolen_base_3b', 'stolen_base_2b')
   # create count flags
   processed_pitch_level_data <- pitch_level_data %>%
     mutate(
@@ -62,7 +63,10 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       is_walk = if_else(PitchCall == 'walk', TRUE, FALSE),
       is_hit = if_else(PitchCall %in% hit_events, TRUE, FALSE),
       is_out = if_else(PitchCall %in% out_events, TRUE, FALSE),
+      is_wild_pitch = if_else(PitchCall == 'wild_pitch', TRUE, FALSE),
       is_double_out = if_else(PitchCall == 'grounded_into_double_play', TRUE, FALSE),
+      is_error = if_else(PitchCall == 'field_error', TRUE, FALSE),
+      is_stolen_base = if_else(PitchCall %in% stolen_base_events, TRUE, FALSE),
       count_leverage = case_when(
         Balls == Strikes ~ "Even",
         Balls > Strikes ~ "Behind",
@@ -93,17 +97,19 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       whiff_perc           = round((sum(is_swinging_strike, na.rm = TRUE) / sum(is_swing, na.rm = TRUE) * 100), 2),
       
       f_strike_perc        = round(sum(is_first_pitch & (is_called_strike | PitchCall %in% swing_events), na.rm = TRUE) / sum(is_first_pitch, na.rm = TRUE) * 100, 2),
-      
+      wild_pitch           = sum(is_wild_pitch, na.rm = TRUE),
       good_take_perc       = round(sum(!is_in_zone & !is_swing, na.rm = TRUE) / sum(!is_in_zone, na.rm = TRUE) * 100, 2),
       
       batters_faced        = sum(PitchCall %in% at_bat_events, na.rm = TRUE),
       
       outs                 = sum(is_out, na.rm = TRUE) + (sum(is_double_out, na.rm = TRUE) * 2),
+      errors               = sum(is_error, na.rm = TRUE),
       
       singles        = sum(PitchCall == 'single', na.rm = TRUE),
       doubles        = sum(PitchCall == 'double', na.rm = TRUE),
       triples        = sum(PitchCall == 'triple', na.rm = TRUE),
-      home_runs        = sum(PitchCall == 'home_run', na.rm = TRUE),
+      home_runs      = sum(PitchCall == 'home_run', na.rm = TRUE),
+      stolen_bases   = sum(is_stolen_base, na.rm = TRUE),
       
       total_hits           = sum(is_hit, na.rm = TRUE),
       
@@ -200,11 +206,9 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       distinct(PitcherId, PitcherHand)
     
     summarized_player_level_data <- summarized_player_level_data %>%
-      select(-good_take_perc) %>%
       left_join(pitcher_id_hand_df, by=('PitcherId'))
     
     summarized_player_pitchtype_level_data <- summarized_player_pitchtype_level_data %>%
-      select(-good_take_perc) %>%
       left_join(pitcher_id_hand_df, by=('PitcherId'))
   
   }
