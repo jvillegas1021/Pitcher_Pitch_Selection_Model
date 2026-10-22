@@ -48,3 +48,5 @@ all_pitchers_whiff_rate_by_pitch_plot_function(all_pitchers_pitchtype_df)
 # use cleaned_pitch_level_data
 pitch_location_plot_function(cleaned_pitch_level_data)
 pitch_movement_plot_function(cleaned_pitch_level_data)
+# use all_pitchers_df
+pitcher_strikeout_rate_vs_swstr_plot_function(all_pitchers_df)
