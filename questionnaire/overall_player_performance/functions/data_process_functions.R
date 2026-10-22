@@ -84,6 +84,12 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
         TRUE ~ NA_character_)
     )
   
+  double_play_out_multiplier <- 2
+  
+  if (group_by_var == 'BatterId') {
+    double_play_out_multiplier <- 1
+  }
+  
   # summarize by pitcher or batter
   
   summarized_player_level_data <- processed_pitch_level_data %>%
@@ -116,7 +122,7 @@ summarise_pitch_level_data <- function(pitch_level_data, group_by_var = "Pitcher
       
       batters_faced        = sum(PitchCall %in% at_bat_events, na.rm = TRUE),
       
-      outs                 = sum(is_out, na.rm = TRUE) + (sum(is_double_out, na.rm = TRUE) * 2),
+      outs                 = sum(is_out, na.rm = TRUE) + (sum(is_double_out, na.rm = TRUE) * double_play_out_multiplier),
       errors               = sum(is_error, na.rm = TRUE),
       walks                = sum(is_walk, na.rm = TRUE),
       singles        = sum(PitchCall == 'single', na.rm = TRUE),
