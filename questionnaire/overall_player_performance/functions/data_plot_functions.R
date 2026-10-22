@@ -306,3 +306,19 @@ all_pitchers_whiff_rate_by_pitch_plot_function <- function(all_pitchers_pitch_le
       panel.spacing = unit(1, "lines") # Adds breathing room between pitcher panels
     )
 }
+
+pitcher_strikeout_rate_vs_swstr_plot_function <- function(all_pitchers_df) {
+  ggplot(all_pitchers_df, aes(x = swstr_perc, y = k_perc)) +
+    geom_point(aes(size = pitches), color = "#0C2340", alpha = 0.7) + 
+    geom_smooth(method = "lm", color = "#FA4616", se = FALSE, linetype = "dashed") +
+    geom_text(aes(label = PitcherId), vjust = -1, size = 3, check_overlap = TRUE) +
+    labs(
+      title = "Pitcher Strikeout Rate vs. Swinging Strike Rate",
+      subtitle = "Dashed line indicates expected K% based on underlying swstr metrics",
+      x = "Swinging Strike Percentage (SwStr%)",
+      y = "Strikeout Percentage (K%)",
+      size = "Total Pitches"
+    ) +
+    theme_minimal() +
+    theme(plot.title = element_text(face = "bold", size = 14))
+}
