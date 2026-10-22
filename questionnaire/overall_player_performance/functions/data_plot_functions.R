@@ -28,8 +28,6 @@ pitch_release_to_finish_plot_function <- function(summarized_pitcher_pitchtype_l
       axis.title = element_text(face = "bold"),
       panel.grid = element_blank(),
       panel.border = element_rect(color = "black", fill = NA))
-  
-  return(pitch_release_to_finish_plot)
 }
 
 pitch_location_plot_function <- function(pitch_level_data) {
@@ -46,9 +44,7 @@ pitch_location_plot_function <- function(pitch_level_data) {
     aes(
       x = TrajectoryLocationX,
       y = TrajectoryLocationZ,
-      color = PitchType
-    )
-  ) +
+      color = PitchType)) +
     geom_hline(yintercept = 0, color = "grey75") +
     geom_vline(xintercept = 0, color = "grey75") +
     geom_point(alpha = 0.8) +
@@ -80,65 +76,50 @@ pitch_movement_plot_function <- function(pitch_level_data) {
       !is.na(TrajectoryPfxHorz),
       !is.na(TrajectoryPfxVert),
       !is.na(PitchType),
-      !is.na(PitcherId)
-    )
+      !is.na(PitcherId))
   
   ggplot(
     movement_data,
     aes(
       x = TrajectoryPfxHorz,
       y = TrajectoryPfxVert,
-      color = PitchType
-    )
-  ) +
-    # Reference lines at zero movement
+      color = PitchType)) +
     geom_hline(
       yintercept = 0,
       color = "grey75",
-      linewidth = 0.4
-    ) +
+      linewidth = 0.4) +
     geom_vline(
       xintercept = 0,
       color = "grey75",
-      linewidth = 0.4
-    ) +
+      linewidth = 0.4) +
     
     # Movement points
     geom_point(
       alpha = 0.65,
-      size = 1.8
-    ) +
+      size = 1.8) +
     
-    facet_wrap(
-      ~ PitcherId,
-      ncol = 5
-    ) +
+    facet_wrap(~ PitcherId,ncol = 5) +
     
     labs(
       title = "Pitch Movement by Pitcher",
       subtitle = "Horizontal vs. vertical spin-induced movement",
       x = "Horizontal Movement (inches)",
       y = "Vertical Movement (inches)",
-      color = "Pitch Type"
-    ) +
+      color = "Pitch Type") +
     
     theme_minimal(base_size = 11) +
     theme(
       plot.title = element_text(
         face = "bold",
-        size = 16
-      ),
+        size = 16),
       plot.subtitle = element_text(
-        color = "grey40"
-      ),
+        color = "grey40"),
       strip.text = element_text(
-        face = "bold"
-      ),
+        face = "bold"),
       panel.grid.minor = element_blank(),
       panel.grid.major = element_line(
         color = "grey90",
-        linewidth = 0.3
-      ),
+        linewidth = 0.3),
       legend.position = "bottom",
       legend.title = element_text(face = "bold"),
       panel.spacing = grid::unit(1, "lines")
@@ -149,8 +130,7 @@ pitch_general_usage_plot_function <- function(summarized_pitch_level_data) {
   
   ggplot(
   summarized_pitch_level_data,
-  aes(x = "", y = pitch_usage, fill = PitchType)
-) +
+  aes(x = "", y = pitch_usage, fill = PitchType)) +
   geom_col(width = 1, color = "black") +
   coord_polar(theta = "y") +
   geom_text(
@@ -183,18 +163,15 @@ pitcher_fastball_velocity_plot_function <- function(summarized_pitch_level_data)
   
   ggplot(
   fastball_velocity_df,
-  aes(x = PitcherId, y = AvgVelocity)
-  ) +
+  aes(x = PitcherId, y = AvgVelocity)) +
   geom_line(color = "steelblue", linewidth = 1) +
   geom_point(color = "darkred", size = 3) +
   scale_x_continuous(
-    breaks = sort(unique(fastball_velocity_df$PitcherId))
-  ) +
+    breaks = sort(unique(fastball_velocity_df$PitcherId))) +
   labs(
     title = 'Average Velocity for Fastball Types (FF, SI, FC) Across Pitchers',
     x = "Pitcher ID",
-    y = "Average Velocity (mph)"
-  ) +
+    y = "Average Velocity (mph)") +
   theme_minimal()
 }
 
@@ -204,22 +181,18 @@ pitcher_chase_rate_plot_function <- function(summarized_pitch_level_data) {
     aes(
       x = factor(PitcherId),
       y = outside_swing_perc,
-      fill = factor(PitcherId)
-    )
-  ) +
+      fill = factor(PitcherId))) +
     geom_col() +
     geom_text(
       aes(label = paste0(round(outside_swing_perc, 1), "%")),
       vjust = 0.5,
       color = "black",
-      size = 3
-    ) +
+      size = 3) +
     labs(
       title = "Chase Rate by Pitcher",
       x = "Pitcher ID",
       y = "Chase Rate (%)",
-      fill = "Pitcher ID"
-    ) +
+      fill = "Pitcher ID") +
     theme_minimal()
 }
 
@@ -229,22 +202,18 @@ pitcher_contact_rate_plot_function <- function(summarized_pitch_level_data) {
     aes(
       x = factor(PitcherId),
       y = contact_perc,
-      fill = factor(PitcherId)
-    )
-  ) +
+      fill = factor(PitcherId))) +
     geom_col() +
     geom_text(
       aes(label = paste0(round(contact_perc, 1), "%")),
       vjust = 0.5,
       color = "black",
-      size = 3
-    ) +
+      size = 3) +
     labs(
       title = "Contact Rate by Pitcher",
       x = "Pitcher ID",
       y = "Contact Rate (%)",
-      fill = "Pitcher ID"
-    ) +
+      fill = "Pitcher ID") +
     theme_minimal()
 }
 
@@ -255,18 +224,17 @@ all_pitchers_velo_and_spin_rate_plot_function <- function(all_pitchers_pitch_lev
     ggplot(aes(
       x = avg_release_speed,
       y = avg_spin_rate,
-      color = PitchType
-    )) +
+      color = PitchType)) +
     geom_point(size = 2.5, alpha = 0.7) +
-    # Group by pitcher so each gets their own small panel
+
     facet_wrap(~ PitcherId) + 
-    labs(
+    
+  labs(
       title = "Pitch Velocity vs. Spin Rate",
       subtitle = "Comparing pitch characteristics across pitchers",
       x = "Average Release Velocity (mph)",
       y = "Average Spin Rate (rpm)",
-      color = "Pitch Type"
-    ) +
+      color = "Pitch Type") +
     theme_minimal(base_size = 12) +
     theme(
       panel.border = element_rect(color = "gray80", fill = NA),
@@ -280,23 +248,21 @@ all_pitchers_whiff_rate_by_pitch_plot_function <- function(all_pitchers_pitch_le
     ggplot(aes(
       x = whiff_perc,
       y = PitchType,
-      color = PitchType # Switched color to PitchType for cleaner intra-facet comparison
-    )) +
+      color = PitchType # Switched color to PitchType for cleaner intra-facet comparison)) +
     geom_point(
       aes(size = pitches),
       alpha = 0.8,
-      position = position_jitter(height = 0.12, width = 0)
-    ) +
-    # Group by pitcher so each gets their own clean column or panel
+      position = position_jitter(height = 0.12, width = 0)) +
+
     facet_wrap(~ PitcherId, ncol = 3) + 
-    labs(
+    
+      labs(
       title = "Whiff Rate by Pitch Type",
       subtitle = "Comparing swing-and-miss profiles across individual pitchers",
       x = "Whiff Rate (%)",
       y = "Pitch Type",
       color = "Pitch Type",
-      size = "Pitch Count"
-    ) +
+      size = "Pitch Count") +
     theme_minimal(base_size = 12) +
     theme(
       legend.position = "right",
